@@ -1,0 +1,27 @@
+
+{
+  "name": "Тариф MegaFon",
+  "short_name": "Life",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#00aa44",
+  "description": "Создайте свой идеальный тариф Life.",
+  "icons": [
+    {
+      "src": "icon_app.jpg",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/jpg"
+    },
+    {
+      "src": "icon_app.jpg",
+      "type": "image/jpg",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon_app.jpg",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

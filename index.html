@@ -291,6 +291,23 @@
         .ai-btn-apply { flex: 1; background: var(--primary-color); color: #fff; border: none; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .ai-btn-copy { flex: 1; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
+        #device-conflict-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); display: none;
+    justify-content: center; align-items: center; z-index: 10000;
+}
+.conflict-box {
+    background: var(--container-bg, #fff); padding: 30px; border-radius: 16px;
+    text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.conflict-box h2 { color: #e74c3c; margin-top: 0; }
+.conflict-box p { color: var(--text-color, #333); margin-bottom: 20px; line-height: 1.5; font-weight: 600;}
+.conflict-btn {
+    background: var(--primary-color, #00B956); color: white; border: none;
+    padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer;
+    width: 100%; margin-bottom: 10px; font-size: 14px;
+}
+.conflict-btn-logout { background: #e74c3c; }
     </style>
 </head>
 
@@ -302,6 +319,14 @@
         <div class="sk-content"><div class="sk-item sk-line sk-line-medium"></div><div class="sk-section"><div class="sk-item sk-line sk-line-short"></div><div class="sk-grid"><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div></div></div><div class="sk-section"><div class="sk-item sk-line sk-line-short"></div><div class="sk-grid"><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div></div></div><div class="sk-item sk-price"></div><div class="sk-card"><div class="sk-item sk-line sk-line-short"></div><div class="sk-card-item"><div class="sk-item sk-icon"></div><div class="sk-text-block"><div class="sk-item sk-text-title"></div><div class="sk-item sk-text-desc"></div></div></div><div class="sk-card-item"><div class="sk-item sk-icon"></div><div class="sk-text-block"><div class="sk-item sk-text-title"></div><div class="sk-item sk-text-desc"></div></div></div></div><div class="sk-footer-card"><div class="sk-item sk-line" style="width: 95%"></div><div class="sk-item sk-line" style="width: 80%"></div></div><div class="sk-item sk-copy-btn"></div></div>
     </div>
 
+    <div id="device-conflict-modal">
+    <div class="conflict-box">
+        <h2>⚠️ Внимание!</h2>
+        <p>Перед входом сначала выйдете из другого устройства или удалите устройство из раздела "Устройства".</p>
+        <button id="btn-force-login" class="conflict-btn">Удалить другое устройство и войти</button>
+        <button onclick="firebase.auth().signOut()" class="conflict-btn conflict-btn-logout">Выйти из аккаунта</button>
+    </div>
+</div>
     
     <div class="container" style="display: none;">
         <div class="header">
@@ -437,37 +462,51 @@
         let currentUserRole = null; 
         const LOGOUT_TIME_MS = 12 * 60 * 60 * 1000; // 12 hours
 
-        // --- 3. AUTO LOGOUT LOGIC ---
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                const loginTimeKey = 'loginTime_' + user.uid;
-                const loginTime = localStorage.getItem(loginTimeKey);
-                
-                if (!loginTime) {
-                    localStorage.setItem(loginTimeKey, Date.now());
-                } else {
-                    if (Date.now() - parseInt(loginTime) > LOGOUT_TIME_MS) {
-                        auth.signOut();
-                        localStorage.removeItem(loginTimeKey);
-                        return;
-                    }
+     // Генератор ID устройства
+function getDeviceInfo() {
+    let id = localStorage.getItem('deviceId');
+    if (!id) { id = 'dev_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('deviceId', id); }
+    return { id: id, info: navigator.platform + ' (' + new Date().toLocaleDateString() + ')' };
+}
+
+let appInitialized = false;
+
+auth.onAuthStateChanged(user => {
+    if (user) {
+        const loginTimeKey = 'loginTime_' + user.uid;
+        const loginTime = localStorage.getItem(loginTimeKey);
+        if (!loginTime) { localStorage.setItem(loginTimeKey, Date.now()); } 
+        else if (Date.now() - parseInt(loginTime) > LOGOUT_TIME_MS) {
+            auth.signOut(); localStorage.removeItem(loginTimeKey); return;
+        }
+
+        // БЛОК ПРОВЕРКИ УСТРОЙСТВА
+        const deviceInfo = getDeviceInfo();
+        database.ref('/users/' + user.uid + '/device').on('value', snap => {
+            const activeDevice = snap.val();
+            // Если устройства нет или это наше текущее устройство
+            if (!activeDevice || activeDevice.id === deviceInfo.id) {
+                document.getElementById('device-conflict-modal').style.display = 'none';
+                if (!activeDevice) {
+                    database.ref('/users/' + user.uid + '/device').set(deviceInfo);
                 }
-
-                setInterval(() => {
-                    const lt = localStorage.getItem(loginTimeKey);
-                    if (lt && (Date.now() - parseInt(lt) > LOGOUT_TIME_MS)) {
-                        auth.signOut();
-                        localStorage.removeItem(loginTimeKey);
-                        window.location.reload();
-                    }
-                }, 60000);
-
-                fetchDataAndInitialize(user);
+                if (!appInitialized) {
+                    appInitialized = true;
+                    fetchDataAndInitialize(user); // Запуск приложения
+                }
             } else {
-                window.location.href = 'login.html?redirect=index.html';
+                // Если зашли с другого устройства
+                document.getElementById('device-conflict-modal').style.display = 'flex';
+                document.getElementById('btn-force-login').onclick = () => {
+                    // Перехватываем сессию на себя
+                    database.ref('/users/' + user.uid + '/device').set(deviceInfo);
+                };
             }
         });
-
+    } else {
+        window.location.href = 'login.html?redirect=index.html';
+    }
+});
         // --- 4. FETCH DATA & INITIALIZE APP ---
         function fetchDataAndInitialize(user) {
             database.ref('/users/' + user.uid).once('value').then(roleSnapshot => {

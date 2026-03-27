@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель Администратора - MegaFon TJ</title>
+    <link rel="website icon" type="png" href="https://shop.megafon.tj/favicon.ico">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#512D6D">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #6410a5; 
+            --secondary-color: #00B956;
+            --text-dark: #222;
+            --text-light: #275e4d;
+            --bg-main: #f4f7f6;
+            --bg-sidebar: #ffffff;
+            --bg-header: #ffffff;
+            --border-color: #e0e0e0;
+            --white: #ffffff;
+            --red: #e02914;
+            --blue: #147bc0;
+            --yellow: #e0900e;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.08);
+            --sidebar-width: 260px;
+            --header-height: 70px;
+        }
+        [data-theme="dark"] {
+            --text-dark: #f0f0f0; --text-light: #999;
+            --bg-main: #1a1a1a; --bg-sidebar: #222222;
+            --bg-header: #222222; --border-color: #333;
+        }
+        [data-theme="dark"] .form-group input,
+        [data-theme="dark"] .form-group textarea,
+        [data-theme="dark"] .form-group select,
+        [data-theme="dark"] .search-bar input,
+        [data-theme="dark"] .filter-group input {
+            background: #2b2b2b; color: var(--text-dark); border-color: #444;
+        }
+        [data-theme="dark"] .btn-secondary,
+        [data-theme="dark"] .card-lang-toggle {
+            background-color: #333; color: var(--text-dark); border-color: #444;
+        }
+        [data-theme="dark"] .template-card,
+        [data-theme="dark"] .user-list-card,
+        [data-theme="dark"] .device-card,
+        [data-theme="dark"] .device-main-wrapper,
+        [data-theme="dark"] .form-container-card { background: var(--bg-sidebar); }
+        [data-theme="dark"] .card-footer { background: #202020; }
+        [data-theme="dark"] .info-message {
+            background-color: #2b2b2b; color: var(--text-light); border-color: #444;
+        }
+        [data-theme="dark"] .device-card-icon { background: var(--bg-main); }
+        
+        .loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-main); display: flex; justify-content: center; align-items: center;
+            z-index: 9999; transition: opacity 0.3s ease-out;
+        }
+        .loader-spinner {
+            width: 50px; height: 50px; border: 5px solid var(--border-color);
+            border-top-color: var(--primary-color); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        [data-theme="dark"] .loader-overlay { background: var(--bg-main); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-main); color: var(--text-dark); }
+        
+        .app-container { display: grid; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: var(--header-height) 1fr; grid-template-areas: "header header" "sidebar content"; height: 100vh; overflow: hidden; visibility: hidden; }
+        .app-container.loaded { visibility: visible; }
+        
+        .app-header { grid-area: header; display: flex; align-items: center; padding: 0 30px; background: var(--bg-header); border-bottom: 1px solid var(--border-color); z-index: 100; gap: 20px; }
+        .header-left { display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
+        .header-right { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+        
+        .hamburger-btn { background: none; border: none; cursor: pointer; padding: 5px; display: none; color: var(--text-light); }
+        .logo-small { height: 30px; width: auto; }
+        #page-title { font-size: 22px; font-weight: 600; color: var(--text-dark); }
+        .user-info span { font-size: 15px; font-weight: 500; }
+        .btn-secondary { padding: 8px 16px; font-size: 14px; font-weight: 600; color: var(--text-dark); background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 18px; cursor: pointer; transition: all 0.2s; }
+        .btn-secondary:hover { background-color: var(--border-color); }
+        .theme-switcher { display: flex; align-items: center; color: var(--text-light); cursor: pointer; }
+        
+        .app-sidebar { grid-area: sidebar; background: var(--bg-sidebar); border-right: 1px solid var(--border-color); padding: 20px; overflow-y: auto; }
+        .app-sidebar nav { display: flex; flex-direction: column; gap: 8px; }
+        .app-sidebar nav a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 16px; font-size: 16px; font-weight: 500; color: var(--text-light); text-decoration: none; transition: all 0.2s; }
+        .app-sidebar nav a:hover { background-color: var(--bg-main); color: var(--text-dark); }
+        .app-sidebar nav a.active { background-color: var(--primary-color); color: var(--white); }
+        .app-sidebar nav a .icon { width: 20px; height: 20px; }
+        
+        .app-content { grid-area: content; overflow-y: auto; padding: 30px; }
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        
+        .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; font-size: 14px; font-weight: 600; color: var(--white); background-color: var(--primary-color); border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.2s;}
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-primary:disabled { background-color: var(--border-color); cursor: not-allowed; }
+        .btn-danger { background-color: var(--red); }
+        .btn-success { background-color: var(--secondary-color); }
+        .btn-warning { background-color: var(--yellow); color: var(--white); }
+        .btn-info { background-color: var(--blue); }
+        .btn-outline { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-dark); }
+        [data-theme="dark"] .btn-outline { color: var(--text-dark); }
+        
+        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        
+        .search-bar { position: relative; width: 100%; flex-grow: 1; max-width: 600px; visibility: hidden; }
+        .app-header .search-bar { visibility: visible; }
+        .search-bar .icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-light); }
+        .search-bar input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 16px; background: var(--white); transition: all 0.3s; }
+        .search-bar input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(100, 16, 165, 0.1); }
+        
+        .filter-bar { display: flex; gap: 15px; flex-grow: 1; flex-wrap: wrap; align-items: center; }
+        .filter-group { position: relative; }
+        .filter-btn { display: inline-flex; align-items: center; gap: 8px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 20px; padding: 8px 14px; font-size: 14px; font-weight: 500; color: var(--text-dark); cursor: pointer; transition: all 0.2s; }
+        .filter-btn:disabled { color: var(--text-light); background-color: var(--bg-main); cursor: not-allowed; opacity: 0.7; }
+        .filter-btn:hover:not(:disabled) { background-color: var(--bg-main); }
+        .filter-btn.active-filter { background-color: var(--primary-color); color: var(--white); border-color: var(--primary-color); }
+        .filter-dropdown { display: none; position: absolute; top: 100%; left: 0; margin-top: 6px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: var(--shadow-medium); z-index: 100; min-width: 240px; max-height: 300px; overflow-y: auto; padding: 6px; }
+        .filter-dropdown.active { display: block; }
+        .filter-dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-weight: 500; transition: background 0.2s;}
+        .filter-dropdown-item:hover { background-color: var(--bg-main); }
+        .filter-dropdown-item.active { background-color: var(--primary-color); color: var(--white); }
+        .tag-color-preview { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+        
+        .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; align-items: stretch; }
+        .template-card { background: var(--white); border: 1px solid var(--border-color); border-radius: 12px; display: flex; flex-direction: column; height: 100%; position: relative;}
+        .card-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+        .card-header h4 { font-size: 16px; color: var(--primary-color); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; }
+        .card-lang-toggle { font-size: 12px; font-weight: 600; color: var(--text-dark); background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 16px; padding: 4px 8px; cursor: pointer; flex-shrink: 0; transition: all 0.2s;}
+        .card-lang-toggle:hover { background: var(--border-color); }
+        .card-body { padding: 16px; flex-grow: 1; display: flex; flex-direction: column; min-height: 0; position: relative; max-height: 120px; overflow: hidden; transition: max-height 0.3s ease-out, padding-bottom 0.2s ease-out; }
+        .card-body.expanded { max-height: 2000px; }
+        .card-body.is-truncated { padding-bottom: 35px; }
+        .lang-content { font-size: 15px; white-space: pre-wrap; word-wrap: break-word; flex-grow: 1; min-height: 0; }
+        .lang-content.active { display: block; }
+        .lang-content:not(.active) { display: none; }
+        .card-body-expander { display: none; position: absolute; bottom: 0; left: 0; right: 0; text-align: right; height: 50px; padding: 25px 16px 10px; background: linear-gradient(to bottom, transparent 0%, var(--white) 50%); cursor: pointer; font-weight: 600; color: var(--primary-color); font-size: 14px; }
+        [data-theme="dark"] .card-body-expander { background: linear-gradient(to bottom, transparent 0%, var(--bg-sidebar) 50%); }
+        .card-body-expander.visible { display: block; }
+        .card-footer { padding: 12px 16px; border-top: 1px solid var(--border-color); background: #fcfcfc; margin-top: auto; }
+        .card-tags { margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag { font-size: 12px; padding: 4px 10px; border-radius: 16px; font-weight: 500; color: var(--white); }
+        .tag-color-0 { background-color: var(--text-light); } .tag-color-1 { background-color: var(--secondary-color); } .tag-color-2 { background-color: var(--primary-color); } .tag-color-3 { background-color: var(--blue); } .tag-color-4 { background-color: var(--red); } .tag-color-5 { background-color: var(--yellow); }
+        .card-meta { display: flex; justify-content: space-between; align-items: center; }
+        .card-footer-actions { display: flex; align-items: center; gap: 6px; }
+        .card-author, .card-footer-actions button, .card-footer-actions span { color: var(--text-light); cursor: pointer; padding: 6px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s;}
+        .card-footer-actions button { background: none; border: none; }
+        .card-footer-actions button:hover, .card-footer-actions span:hover, .card-author:hover { background-color: var(--bg-main); color: var(--text-dark); }
+        .card-favorite.favorited { color: var(--yellow); fill: var(--yellow); }
+        .icon-small { width: 18px; height: 18px; }
+        .icon { width: 20px; height: 20px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; background: var(--white); transition: all 0.2s;}
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--primary-color); }
+        .form-group input:disabled { background-color: var(--bg-main); opacity: 0.7; }
+        
+        /* КАРТОЧКИ ПОЛЬЗОВАТЕЛЕЙ И РОЛИ */
+        .user-list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .user-list-card { background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 12px; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;}
+        .user-list-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-light); }
+        .user-card-header { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid var(--border-color); }
+        .user-card-header h4 { font-size: 18px; margin: 0; display:flex; flex-direction:column; gap:5px;}
+        .role-badge { font-size: 11px; padding: 4px 8px; border-radius: 10px; background: var(--bg-main); color: var(--text-light); display:inline-block; width: fit-content;}
+        .role-badge.admin { background: #e8dbf1; color: var(--primary-color); }
+        .role-badge.moderator { background: #dff0d8; color: var(--secondary-color); }
+        .status-badge { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 16px; color: var(--white); }
+        .status-badge.pending { background-color: var(--yellow); } .status-badge.approved { background-color: var(--secondary-color); } .status-badge.rejected { background-color: var(--red); }
+        .user-card-body { padding: 16px; }
+        .user-card-body p { font-size: 14px; color: var(--text-light); margin-bottom: 10px; word-wrap: break-word; }
+        .user-card-body p strong { color: var(--text-dark); }
+        .user-card-footer { padding: 12px 16px; border-top: 1px solid var(--border-color); margin-top: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+        .user-card-footer .btn-primary { flex-grow: 1; text-align: center; padding: 8px 10px; font-size: 13px; }
+
+        /* СПИСОК УСТРОЙСТВ */
+        .device-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 10px; }
+        .device-card { display: flex; align-items: center; padding: 12px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 12px; gap: 12px; }
+        .device-card-icon { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: var(--white); border-radius: 10px; color: var(--primary-color); box-shadow: var(--shadow-light); flex-shrink: 0; }
+        .device-card-content { display: flex; flex-direction: column; overflow: hidden; }
+        .device-card-label { font-size: 10px; color: var(--text-light); text-transform: uppercase; font-weight: 600; margin-bottom: 2px; }
+        .device-card-value { font-size: 13px; color: var(--text-dark); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .device-main-wrapper { border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; margin-bottom: 20px; background: var(--white); position: relative;}
+
+        /* МОДАЛКИ */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 1000; display: grid; place-items: center; overflow-y: auto; padding: 20px; animation: fadeIn 0.2s forwards; }
+        .modal-content { background: var(--bg-sidebar); padding: 24px 30px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); width: 100%; max-width: 600px; z-index: 1001; max-height: 90vh; overflow-y: auto; transform: scale(0.95); opacity: 0; animation: zoomInModal 0.3s forwards cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        .modal-content.large { max-width: 900px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 20px; }
+        .modal-header h3 { font-size: 20px; color: var(--primary-color); margin:0;}
+        .modal-close-btn { background: none; border: none; cursor: pointer; color: var(--text-light); padding: 6px; border-radius: 50%; transition: all 0.2s;}
+        .modal-close-btn:hover { background-color: var(--bg-main); color: var(--red); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes zoomInModal { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; pointer-events: none;}
+        .toast { padding: 15px 20px; border-radius: 8px; box-shadow: var(--shadow-medium); color: var(--white); font-weight: 500; opacity: 0; transform: translateX(100%); transition: all 0.4s cubic-bezier(0.21, 1.02, 0.73, 1); pointer-events: auto;}
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .toast.success { background-color: var(--secondary-color); } .toast.error { background-color: var(--red); } .toast.info { background-color: var(--blue); }
+        
+        @media (max-width: 900px) {
+            .app-container { grid-template-columns: 1fr; grid-template-areas: "header" "content"; }
+            .app-sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: var(--sidebar-width); z-index: 1001; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+            .app-sidebar.visible { transform: translateX(0); }
+            .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; }
+            .hamburger-btn { display: block; z-index: 1002; }
+            .app-header { padding: 10px 20px; flex-wrap: wrap; height: auto; }
+            .app-header .header-right { margin-left: auto; }
+            .app-header .search-bar { order: 3; width: 100%; max-width: none; margin-top: 10px; }
+            .app-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="page-loader" class="loader-overlay"><div class="loader-spinner"></div></div>
+    <div id="toast-container"></div>
+    
+    <div class="app-container" id="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <button class="hamburger-btn" id="hamburger-btn"><i data-feather="menu"></i></button>
+                <img src="https://raw.githubusercontent.com/shop-megafontj/bisozz/refs/heads/main/horizontal-logo.png" alt="MegaFon Logo" class="logo-small">
+                <h1 id="page-title">Шаблоны</h1>
+            </div>
+            <div class="search-bar">
+                <i data-feather="search" class="icon"></i>
+                <input type="search" id="title-search-input" placeholder="Поиск по шаблонам, тегам, авторам...">
+            </div>
+            <div class="header-right">
+                <div class="theme-switcher" id="theme-switcher" title="Переключить тему"><i data-feather="sun"></i></div>
+                <div class="user-info"><span id="admin-user-email">...</span></div>
+                <button id="admin-logout" class="btn-secondary">Выйти</button>
+            </div>
+        </header>
+
+        <aside class="app-sidebar" id="app-sidebar">
+            <nav>
+                <a href="#" class="nav-link active" data-target="templates-page"><i data-feather="grid" class="icon"></i> Шаблоны</a>
+                <a href="#" class="nav-link" data-target="favorites-page"><i data-feather="star" class="icon"></i> Избранное</a>
+                <a href="#" class="nav-link" data-target="pending-page"><i data-feather="clock" class="icon"></i> Заявки</a>
+                <a href="#" class="nav-link" data-target="operators-page"><i data-feather="users" class="icon"></i> Пользователи</a> 
+                <a href="https://bisoz.netlify.app/admink.html" class="nav-link" target="_blank"><i data-feather="external-link" class="icon"></i> Admin-Bisoz</a>
+            </nav>
+        </aside>
+
+        <main class="app-content">
+            <div id="templates-page" class="page-section active">
+                <div class="content-header">
+                    <div class="filter-bar" id="filter-bar">
+                        <div class="filter-group tag-filter">
+                            <button class="filter-btn" data-filter="tags" id="tags-filter-btn" disabled>
+                                <i data-feather="tag" class="icon"></i> <span class="filter-btn-text">Все метки</span>
+                            </button>
+                            <div class="filter-dropdown" data-filter-list="tags"></div>
+                        </div>
+                        <div class="filter-group author-filter">
+                            <button class="filter-btn" data-filter="authors" id="authors-filter-btn" disabled>
+                                <i data-feather="user" class="icon"></i> <span class="filter-btn-text">Все авторы</span>
+                            </button>
+                            <div class="filter-dropdown" data-filter-list="authors"></div>
+                        </div>
+                    </div>
+                    <button id="open-add-modal-btn" class="btn-primary"><i data-feather="plus" class="icon"></i> Добавить</button>
+                </div>
+                
+                <div class="template-grid" id="template-skeleton-loader">
+                    <div class="skeleton-card"><div class="card-header"><div class="skeleton-line" style="width: 70%; height: 20px;"></div></div><div class="card-body"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line" style="width: 80%;"></div></div></div>
+                    <div class="skeleton-card"><div class="card-header"><div class="skeleton-line" style="width: 70%; height: 20px;"></div></div><div class="card-body"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line" style="width: 80%;"></div></div></div>
+                    <div class="skeleton-card"><div class="card-header"><div class="skeleton-line" style="width: 70%; height: 20px;"></div></div><div class="card-body"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line" style="width: 80%;"></div></div></div>
+                </div>
+                <div class="template-grid" id="admin-template-list" style="display: none;"></div>
+            </div>
+            
+            <div id="favorites-page" class="page-section">
+                <div class="content-header"><h2>Избранные шаблоны</h2></div>
+                <div class="template-grid" id="favorites-template-list"></div>
+            </div>
+
+            <div id="pending-page" class="page-section">
+                <div class="content-header"><h2>Заявки на регистрацию</h2></div>
+                <div class="user-list-grid" id="pending-list"></div>
+            </div>
+            
+            <div id="operators-page" class="page-section">
+                <div class="content-header">
+                    <h2>Все пользователи системы</h2>
+                    <button id="open-register-user-modal-btn" class="btn-primary" style="background-color: var(--blue);"><i data-feather="user-plus" class="icon"></i> Добавить пользователя</button>
+                </div>
+                <div class="user-list-grid" id="operators-list"></div>
+            </div>
+        </main>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" style="display: none;"></div>
+    
+    <!-- Модалка: Добавление/Редактирование Шаблона -->
+    <div id="template-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Добавить шаблон</h3>
+                <button id="close-modal-btn" class="modal-close-btn"><i data-feather="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="admin-template-form" style="box-shadow: none; padding: 0;">
+                    <input type="hidden" id="admin-template-id">
+                    <div class="form-group"><label>Название (Необязательно)</label><input type="text" id="admin-template-title" placeholder="Краткое название шаблона"></div>
+                    <div class="form-group"><label>Текст (Таджикский)</label><textarea id="admin-template-tj" rows="3" required placeholder="Введите текст на таджикском..."></textarea></div>
+                    <div class="form-group"><label>Текст (Русский)</label><textarea id="admin-template-ru" rows="3" required placeholder="Введите текст на русском..."></textarea></div>
+                    <div class="form-group"><label>Метки (через запятую)</label><input type="text" id="admin-template-tags" placeholder="интернет, претензия, приветствие"></div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Сохранить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка: Отклонение заявки -->
+    <div id="rejection-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Причина отклонения</h3>
+                <button id="close-rejection-modal-btn" class="modal-close-btn"><i data-feather="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="rejection-form">
+                    <input type="hidden" id="rejection-user-id">
+                    <div class="form-group">
+                        <textarea id="rejection-reason-input" rows="4" placeholder="Например: ФИО указано неверно." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary btn-danger" style="width: 100%;">Отклонить заявку</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка: Регистрация нового пользователя -->
+    <div id="register-user-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Новый пользователь</h3>
+                <button id="close-register-user-modal-btn" class="modal-close-btn"><i data-feather="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="register-user-form">
+                    <div class="form-group"><label>ФИО Пользователя</label><input type="text" id="reg-name" required placeholder="Например: Иванов Иван"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="reg-email" required placeholder="example@megafon.tj"></div>
+                    <div class="form-group"><label>Пароль (минимум 6 символов)</label><input type="password" id="reg-password" required minlength="6"></div>
+                    <div class="form-group"><label>Подтверждение пароля</label><input type="password" id="reg-confirm-password" required minlength="6"></div>
+                    <div class="form-group">
+                        <label>Роль в системе</label>
+                        <select id="reg-role" required>
+                            <option value="operator">Оператор (Только свои шаблоны)</option>
+                            <option value="moderator">Модератор (Проверка шаблонов)</option>
+                            <option value="admin">Администратор (Полный доступ)</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="btn-submit-reg" class="btn-primary btn-info" style="width: 100%;">Зарегистрировать и дать доступ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка: Редактирование пользователя -->
+    <div id="user-edit-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Изменить пользователя</h3>
+                <button id="close-user-edit-modal-btn" class="modal-close-btn"><i data-feather="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="user-edit-form">
+                    <input type="hidden" id="user-edit-uid">
+                    <div class="form-group"><label>ФИО Пользователя</label><input type="text" id="user-edit-name" required></div>
+                    <div class="form-group">
+                        <label>Роль в системе</label>
+                        <select id="user-edit-role">
+                            <option value="operator">Оператор (Только свои шаблоны)</option>
+                            <option value="moderator">Модератор (Проверка шаблонов)</option>
+                            <option value="admin">Администратор (Полный доступ)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary btn-info" style="width: 100%;">Сохранить изменения</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка: Устройства пользователя -->
+    <div id="user-devices-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Устройства пользователя <span id="devices-modal-username" style="color:var(--text-dark); font-size:16px;"></span></h3>
+                <button id="close-devices-modal-btn" class="modal-close-btn"><i data-feather="x"></i></button>
+            </div>
+            <div class="modal-body" id="user-devices-list" style="max-height: 60vh; overflow-y:auto; padding-right:5px;">
+                <!-- Сюда подгружаются устройства -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDiT7lVckjmU6UGWsFZQnk-4mDMSXSI2vA",
+        authDomain: "life-a79ef.firebaseapp.com",
+        projectId: "life-a79ef",
+        storageBucket: "life-a79ef.firebasestorage.app",
+        messagingSenderId: "1024688234300",
+        appId: "1:1024688234300:web:94f2bb9b46b3163be34839",
+        measurementId: "G-BHKK3JEQ1G"
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // Убираем лоадер
+        const loader = document.getElementById("page-loader");
+        const appContainer = document.getElementById("app-container");
+        if (loader && appContainer) {
+            appContainer.classList.add("loaded");
+            loader.style.opacity = '0';
+            setTimeout(() => { loader.style.display = 'none'; }, 300);
+        }
+
+        // 1. Инициализация Основного приложения
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // 2. Инициализация Вторичного приложения для регистрации (без вылета админа)
+        let secondaryApp;
+        try {
+            secondaryApp = firebase.app("Secondary");
+        } catch (e) {
+            secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
+        }
+        const secondaryAuth = secondaryApp.auth();
+        
+        // Глобальные переменные
+        let currentUser = null; 
+        let allTemplates = {};
+        let allUsers = {};
+        let currentFilters = { title: '', tag: 'all', author: 'all' };
+        let allAvailableTags = new Set();
+        let currentGlobalLang = 'tj';
+
+        const roleDisplay = {
+            'admin': 'Админ',
+            'moderator': 'Модератор',
+            'operator': 'Оператор'
+        };
+// ==========================================
+        // 1. АНАЛИЗАТОР УСТРОЙСТВА (Трекер)
+        // ==========================================
+        function getExtendedDeviceInfo() {
+            const ua = navigator.userAgent;
+            let browser = "Неизвестно"; let os = "Неизвестно"; let model = "ПК / Ноутбук";
+
+            if (ua.includes("Firefox/")) browser = "Mozilla Firefox";
+            else if (ua.includes("Edg/")) browser = "Microsoft Edge";
+            else if (ua.includes("Chrome/") || ua.includes("CriOS/")) browser = "Google Chrome";
+            else if (ua.includes("Safari/") && !ua.includes("Chrome")) browser = "Apple Safari";
+
+            if (/Android/i.test(ua)) {
+                os = "Android";
+                const match = ua.match(/Android.*?; (.+?) Build/);
+                model = match ? match[1] : "Android Смартфон";
+            } else if (/iPhone/i.test(ua)) { os = "iOS"; model = "Apple iPhone";
+            } else if (/Windows NT 10.0/i.test(ua)) { os = "Windows 10/11";
+            } else if (/Mac OS/i.test(ua)) { os = "macOS"; model = "Apple Mac"; }
+
+            let id = localStorage.getItem('deviceId');
+            if (!id) { id = 'dev_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('deviceId', id); }
+            return { id, os, browser, model };
+        }
+
+        // ==========================================
+        // 2. АВТОРИЗАЦИЯ АДМИНА И СОХРАНЕНИЕ СЕССИИ
+        // ==========================================
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                db.ref('/users/' + user.uid).once('value', snapshot => {
+                    const userData = snapshot.val();
+                    if (userData && (userData.role === 'admin' || userData.isAdmin)) {
+                        currentUser = { uid: user.uid, email: user.email, ...userData };
+                        
+                        // --- СОХРАНЯЕМ ТЕКУЩЕЕ УСТРОЙСТВО В БАЗУ ---
+                        const devInfo = getExtendedDeviceInfo();
+                        const deviceRef = db.ref(`/users/${user.uid}/devices/${devInfo.id}`);
+                        
+                        deviceRef.update({
+                            os: devInfo.os, 
+                            browser: devInfo.browser, 
+                            model: devInfo.model, 
+                            lastActive: new Date().toISOString()
+                        });
+                        db.ref(`/users/${user.uid}/activeDevice`).set(devInfo.id);
+
+                        fetch('https://api.ipify.org?format=json')
+                            .then(r => r.json())
+                            .then(d => { deviceRef.update({ ip: d.ip }); })
+                            .catch(() => {});
+                        // -------------------------------------------
+
+                        initAdminPanel();
+                    } else {
+                        showToast("Доступ запрещен. У вас нет прав администратора.", "error");
+                        auth.signOut();
+                    }
+                });
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+        // ==========================================
+        // ИНИЦИАЛИЗАЦИЯ ВСЕХ ОБРАБОТЧИКОВ И ИНТЕРФЕЙСА
+        // ==========================================
+        function initAdminPanel() {
+            if (window.listenersInitialized) return;
+            document.getElementById("admin-user-email").textContent = currentUser.email;
+
+            // Навигация
+            document.querySelectorAll(".nav-link").forEach(link => {
+                link.addEventListener("click", (e) => {
+                    // Разрешаем переход по внешним ссылкам (Admin-Bisoz)
+                    if(link.getAttribute("target") === "_blank") return; 
+                    e.preventDefault(); 
+                    navigateToPage(link.getAttribute("data-target")); 
+                });
+            });
+            document.getElementById("admin-logout").addEventListener("click", () => auth.signOut());
+
+            // Переключение тем
+            const themeSwitcher = document.getElementById("theme-switcher");
+            themeSwitcher.addEventListener('click', () => {
+                const currentTheme = localStorage.getItem('theme') || 'light';
+                setTeam(currentTheme === 'dark' ? 'light' : 'dark');
+            });
+            setTeam(localStorage.getItem('theme') || 'light');
+
+            // Мобильное меню
+            document.getElementById("hamburger-btn").addEventListener("click", () => { document.getElementById("app-sidebar").classList.toggle("visible"); document.getElementById("sidebar-overlay").style.display = "block"; });
+            document.getElementById("sidebar-overlay").addEventListener("click", () => { document.getElementById("app-sidebar").classList.remove("visible"); document.getElementById("sidebar-overlay").style.display = "none"; });
+
+            // Поиск и Фильтры
+            document.getElementById("title-search-input").addEventListener("input", handleSearch);
+            setupFilterListeners();
+
+            // Модалки (Шаблоны)
+            document.getElementById("open-add-modal-btn").addEventListener("click", () => openTemplateModal('add'));
+            document.getElementById("close-modal-btn").addEventListener("click", closeTemplateModal);
+            document.getElementById("admin-template-form").addEventListener("submit", handleAdminFormSubmit);
+            document.getElementById("template-modal").addEventListener("click", (e) => { if (e.target.id === "template-modal") closeTemplateModal(); });
+            
+            // Модалки (Отклонение заявки)
+            document.getElementById("close-rejection-modal-btn").addEventListener("click", closeRejectionModal);
+            document.getElementById("rejection-form").addEventListener("submit", handleRejectionSubmit);
+            
+            // Модалки (Редактирование пользователя)
+            document.getElementById("close-user-edit-modal-btn").addEventListener("click", closeUserEditModal);
+            document.getElementById("user-edit-form").addEventListener("submit", handleUserEditFormSubmit);
+
+            // Модалки (Устройства)
+            document.getElementById("close-devices-modal-btn").addEventListener("click", closeDevicesModal);
+            document.getElementById("user-devices-modal").addEventListener("click", (e) => { if (e.target.id === "user-devices-modal") closeDevicesModal(); });
+
+            // Обработчики создания нового пользователя
+            document.getElementById("open-register-user-modal-btn").addEventListener("click", () => { document.getElementById("register-user-modal").style.display = "grid"; });
+            document.getElementById("close-register-user-modal-btn").addEventListener("click", () => { document.getElementById("register-user-modal").style.display = "none"; document.getElementById("register-user-form").reset(); });
+            document.getElementById("register-user-form").addEventListener("submit", handleRegisterNewUser);
+            document.getElementById("register-user-modal").addEventListener("click", (e) => { if (e.target.id === "register-user-modal") { document.getElementById("register-user-modal").style.display = "none"; document.getElementById("register-user-form").reset(); } });
+
+            // Клик по карточкам
+            document.getElementById("admin-template-list").addEventListener("click", handleCardClick);
+            document.getElementById("favorites-template-list").addEventListener("click", handleCardClick);
+            document.getElementById("pending-list").addEventListener("click", handleUserCardClick);
+            document.getElementById("operators-list").addEventListener("click", handleUserCardClick);
+
+            // Запуск слушателей БД
+            listenForUsers();
+            listenForTemplates();
+            navigateToPage("templates-page");
+            window.listenersInitialized = true;
+        }
+
+        function setTeam(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            document.querySelector('#theme-switcher i').setAttribute('data-feather', theme === 'dark' ? 'sun' : 'moon');
+            feather.replace();
+        }
+
+        // ==========================================
+        // НАВИГАЦИЯ, ПОИСК И ФИЛЬТРЫ
+        // ==========================================
+        function navigateToPage(targetId) {
+            document.querySelectorAll(".page-section").forEach(section => section.classList.toggle("active", section.id === targetId));
+            const activeLink = document.querySelector(`.nav-link[data-target="${targetId}"]`);
+            if (activeLink) {
+                document.getElementById("page-title").textContent = activeLink.textContent.trim();
+                document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+                activeLink.classList.add("active");
+            }
+            
+            const searchInput = document.getElementById('title-search-input');
+            const filterBar = document.getElementById('filter-bar');
+            
+            if (targetId === 'templates-page' || targetId === 'favorites-page') {
+                filterBar.style.display = 'flex';
+                searchInput.placeholder = "Поиск по шаблонам, тегам, авторам...";
+                renderAllLists();
+            } else if (targetId === 'operators-page' || targetId === 'pending-page') {
+                filterBar.style.display = 'none';
+                searchInput.placeholder = "Поиск пользователей (имя, email)...";
+                renderOperators();
+            }
+            
+            if (window.innerWidth <= 900) {
+                document.getElementById("app-sidebar").classList.remove("visible");
+                document.getElementById("sidebar-overlay").style.display = "none";
+            }
+        }
+
+        function handleSearch(e) {
+            currentFilters.title = e.target.value.toLowerCase();
+            const activePageId = document.querySelector('.page-section.active').id;
+            if (activePageId === 'templates-page' || activePageId === 'favorites-page') renderAllLists();
+            else if (activePageId === 'operators-page' || activePageId === 'pending-page') { renderOperators(); renderPendingUsers(); }
+        }
+
+        function setupFilterListeners() {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const dropdowns = document.querySelectorAll('.filter-dropdown');
+            
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const filterName = btn.dataset.filter;
+                    const dropdown = document.querySelector(`.filter-dropdown[data-filter-list="${filterName}"]`);
+                    dropdowns.forEach(d => { if (d !== dropdown) d.classList.remove('active'); });
+                    dropdown.classList.toggle('active');
+                });
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.filter-group')) {
+                    dropdowns.forEach(d => d.classList.remove('active'));
+                }
+            });
+            
+            document.querySelector('.filter-dropdown[data-filter-list="tags"]').addEventListener('click', (e) => {
+                const item = e.target.closest('.filter-dropdown-item');
+                if (!item) return;
+                currentFilters.tag = item.dataset.value;
+                updateFilterButtonUI(document.querySelector('.filter-btn[data-filter="tags"]'), item.textContent, currentFilters.tag !== 'all');
+                renderAllLists();
+                document.querySelector('.filter-dropdown[data-filter-list="tags"]').classList.remove('active');
+            });
+            
+            document.querySelector('.filter-dropdown[data-filter-list="authors"]').addEventListener('click', (e) => {
+                const item = e.target.closest('.filter-dropdown-item');
+                if (!item) return;
+                currentFilters.author = item.dataset.value;
+                updateFilterButtonUI(document.querySelector('.filter-btn[data-filter="authors"]'), item.textContent, currentFilters.author !== 'all');
+                renderAllLists();
+                document.querySelector('.filter-dropdown[data-filter-list="authors"]').classList.remove('active');
+            });
+        }
+
+        function updateFilterButtonUI(btnElement, text, isActive) {
+            btnElement.querySelector('.filter-btn-text').textContent = text;
+            btnElement.classList.toggle('active-filter', isActive);
+        }
+
+        function populateTagFilter() {
+            const dropdownTagList = document.querySelector('.filter-dropdown[data-filter-list="tags"]');
+            dropdownTagList.innerHTML = `<div class="filter-dropdown-item ${currentFilters.tag === 'all' ? 'active' : ''}" data-value="all">Все метки</div>`;
+            allAvailableTags.forEach(tag => {
+                dropdownTagList.insertAdjacentHTML('beforeend', `<div class="filter-dropdown-item ${currentFilters.tag === tag ? 'active' : ''}" data-value="${tag}"><span class="tag-color-preview ${getTagColor(tag)}"></span> ${tag}</div>`);
+            });
+            document.getElementById("tags-filter-btn").disabled = false;
+        }
+
+        function populateAuthorFilter() {
+            if (Object.keys(allUsers).length === 0) return;
+            const dropdownAuthorList = document.querySelector('.filter-dropdown[data-filter-list="authors"]');
+            dropdownAuthorList.innerHTML = `<div class="filter-dropdown-item ${currentFilters.author === 'all' ? 'active' : ''}" data-value="all">Все авторы</div>`;
+            for (const uid in allUsers) {
+                const user = allUsers[uid];
+                if (user && user.name) {
+                    dropdownAuthorList.insertAdjacentHTML('beforeend', `<div class="filter-dropdown-item ${currentFilters.author === uid ? 'active' : ''}" data-value="${uid}">${user.name}</div>`);
+                }
+            }
+            document.getElementById("authors-filter-btn").disabled = false;
+        }
+
+        // ==========================================
+        // БАЗА ДАННЫХ И СЛУШАТЕЛИ
+        // ==========================================
+        function listenForUsers() {
+            db.ref('users').on('value', snapshot => {
+                allUsers = snapshot.val() || {};
+                populateAuthorFilter();
+                renderPendingUsers();
+                renderOperators();
+            }, err => { showToast("Ошибка загрузки пользователей.", "error"); console.error(err); });
+        }
+
+        function listenForTemplates() {
+            db.ref('templates').on('value', snapshot => {
+                allTemplates = snapshot.val() || {};
+                allAvailableTags.clear();
+                for (const id in allTemplates) {
+                    if (allTemplates[id].tags) allTemplates[id].tags.forEach(tag => allAvailableTags.add(tag));
+                }
+                document.getElementById("template-skeleton-loader").style.display = "none";
+                populateTagFilter();
+                renderAllLists();
+            }, err => { 
+                showToast("Ошибка загрузки шаблонов.", "error"); 
+                document.getElementById("template-skeleton-loader").style.display = "none";
+            });
+        }
+
+        // ==========================================
+        // ЛОГИКА СОЗДАНИЯ НОВОГО ПОЛЬЗОВАТЕЛЯ
+        // ==========================================
+        function handleRegisterNewUser(e) {
+            e.preventDefault();
+            const name = document.getElementById("reg-name").value.trim();
+            const email = document.getElementById("reg-email").value.trim();
+            const pass = document.getElementById("reg-password").value;
+            const confirmPass = document.getElementById("reg-confirm-password").value;
+            const role = document.getElementById("reg-role").value;
+
+            if (pass !== confirmPass) {
+                showToast("Пароли не совпадают!", "error");
+                return;
+            }
+
+            const btn = document.getElementById("btn-submit-reg");
+            btn.disabled = true;
+            btn.textContent = "Регистрация...";
+
+            // Создаем пользователя через Secondary App, чтобы основной админ не вылетел
+            secondaryAuth.createUserWithEmailAndPassword(email, pass)
+                .then((userCredential) => {
+                    const newUid = userCredential.user.uid;
+                    // Сохраняем в базу как полностью одобренного
+                    return db.ref('users/' + newUid).set({
+                        name: name,
+                        email: email,
+                        role: role,
+                        isAdmin: role === 'admin',
+                        approved: true, // Сразу одобрен
+                        createdAt: new Date().toISOString()
+                    });
+                })
+                .then(() => {
+                    showToast("Пользователь успешно создан и одобрен!", "success");
+                    document.getElementById("register-user-modal").style.display = "none";
+                    document.getElementById("register-user-form").reset();
+                    secondaryAuth.signOut(); // Выходим из вторичного приложения
+                })
+                .catch((error) => {
+                    let msg = error.message;
+                    if (error.code === 'auth/email-already-in-use') msg = "Эта почта уже зарегистрирована.";
+                    if (error.code === 'auth/weak-password') msg = "Пароль слишком простой.";
+                    showToast(msg, "error");
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = "Зарегистрировать и дать доступ";
+                });
+        }
+
+        // ==========================================
+        // РЕНДЕР ПОЛЬЗОВАТЕЛЕЙ
+        // ==========================================
+        function renderPendingUsers() {
+            const listEl = document.getElementById("pending-list");
+            listEl.innerHTML = "";
+            let hasPending = false;
+            
+            for (const uid in allUsers) {
+                const user = allUsers[uid];
+                if (user.approved === true) continue; // Пропускаем одобренных
+                
+                hasPending = true;
+                const statusText = user.approved === false ? "Ожидает" : "Отклонен";
+                const statusClass = user.approved === false ? "pending" : "rejected";
+                const role = user.role || 'operator';
+
+                const card = document.createElement("div");
+                card.className = "user-list-card";
+                card.dataset.uid = uid;
+                
+                card.innerHTML = `
+                    <div class="user-card-header">
+                        <h4>${user.name || 'Имя не указано'} <span class="role-badge ${role}">${roleDisplay[role]}</span></h4>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="user-card-body">
+                        <p><strong>Email:</strong> ${user.email}</p>
+                        ${user.approved === 'rejected' ? `<p><strong>Причина:</strong> ${user.rejectionReason || 'Не указана'}</p>` : ''}
+                    </div>
+                    <div class="user-card-footer">
+                        <button class="btn-primary btn-success" data-action="approve">Одобрить</button>
+                        ${user.approved === false ? `<button class="btn-primary btn-warning" data-action="reject">Отклонить</button>` : ''}
+                        <button class="btn-primary btn-outline" data-action="devices" title="Устройства"><i data-feather="monitor" class="icon-small"></i> Сессии</button>
+                        <button class="btn-primary btn-info" data-action="edit">Изменить</button>
+                        <button class="btn-primary btn-danger" data-action="delete">Удалить</button>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            }
+            if (!hasPending) listEl.innerHTML = "<p>Нет новых заявок.</p>";
+            feather.replace();
+        }
+
+        function renderOperators() {
+            const listEl = document.getElementById("operators-list");
+            listEl.innerHTML = "";
+            let hasOperators = false;
+            const searchTerm = currentFilters.title;
+            
+            for (const uid in allUsers) {
+                const user = allUsers[uid];
+                if (user.approved !== true) continue;
+                
+                if (searchTerm) {
+                    if (!(user.name || '').toLowerCase().includes(searchTerm) && !(user.email || '').toLowerCase().includes(searchTerm)) continue;
+                }
+                
+                hasOperators = true;
+                const role = user.role || (user.isAdmin ? 'admin' : 'operator');
+
+                const card = document.createElement("div");
+                card.className = "user-list-card";
+                card.dataset.uid = uid;
+                
+                card.innerHTML = `
+                    <div class="user-card-header">
+                        <h4>${user.name} <span class="role-badge ${role}">${roleDisplay[role]}</span></h4>
+                        <span class="status-badge approved">Активен</span>
+                    </div>
+                    <div class="user-card-body">
+                        <p><strong>Email:</strong> ${user.email}</p>
+                        <p><strong>Устройств (История):</strong> ${user.devices ? Object.keys(user.devices).length : 0} шт.</p>
+                    </div>
+                    <div class="user-card-footer">
+                        <button class="btn-primary btn-outline" data-action="devices"><i data-feather="monitor" class="icon-small"></i> Сессии</button>
+                        <button class="btn-primary btn-info" data-action="edit">Изменить</button>
+                        <button class="btn-primary btn-danger" data-action="delete">Удалить</button>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            }
+            if (!hasOperators && !searchTerm) listEl.innerHTML = "<p>Нет одобренных пользователей.</p>";
+            else if (!hasOperators && searchTerm) listEl.innerHTML = "<p>Пользователи не найдены.</p>";
+            feather.replace();
+        }
+
+        function handleUserCardClick(e) {
+            const card = e.target.closest(".user-list-card");
+            if (!card) return;
+            const uid = card.dataset.uid;
+            const action = e.target.closest("[data-action]")?.dataset.action;
+            
+            if (action === 'approve') handleUserApproval(uid, true);
+            else if (action === 'reject') openRejectionModal(uid);
+            else if (action === 'edit') openUserEditModal(uid);
+            else if (action === 'delete') handleUserDelete(uid);
+            else if (action === 'devices') openDevicesModal(uid);
+        }
+
+        function handleUserApproval(uid, status, reason = null) {
+            db.ref('users/' + uid).update({ approved: status, rejectionReason: reason })
+            .then(() => { showToast(`Оператор ${status === true ? 'одобрен' : 'отклонен'}.`, "success"); closeRejectionModal(); })
+            .catch(err => showToast(`Ошибка: ${err.message}`, "error"));
+        }
+
+        function handleUserDelete(uid) {
+            if (uid === currentUser.uid) return showToast("Вы не можете удалить свой аккаунт.", "error");
+            if (confirm(`Удалить пользователя из базы? Это закроет ему доступ в систему (необратимо).`)) {
+                db.ref('users/' + uid).remove().then(() => showToast("Пользователь удален.", "info"));
+            }
+        }
+
+        function openUserEditModal(uid) {
+            const user = allUsers[uid];
+            document.getElementById("user-edit-uid").value = uid;
+            document.getElementById("user-edit-name").value = user.name || '';
+            document.getElementById("user-edit-role").value = user.role || (user.isAdmin ? 'admin' : 'operator');
+            document.getElementById("user-edit-modal").style.display = "grid";
+        }
+        function closeUserEditModal() { document.getElementById("user-edit-modal").style.display = "none"; }
+
+        function handleUserEditFormSubmit(e) {
+            e.preventDefault();
+            const uid = document.getElementById("user-edit-uid").value;
+            const newName = document.getElementById("user-edit-name").value;
+            const newRole = document.getElementById("user-edit-role").value;
+            
+            db.ref('users/' + uid).update({ name: newName, role: newRole, isAdmin: newRole === 'admin' })
+                .then(() => { showToast("Данные сохранены.", "success"); closeUserEditModal(); });
+        }
+
+        // ==========================================
+        // ПРОСМОТР И УПРАВЛЕНИЕ УСТРОЙСТВАМИ (СЕССИЯМИ)
+        // ==========================================
+        let currentViewingUid = null;
+        function openDevicesModal(uid) {
+            currentViewingUid = uid;
+            const user = allUsers[uid];
+            document.getElementById("devices-modal-username").textContent = `(${user.name})`;
+            document.getElementById("user-devices-modal").style.display = "grid";
+            renderUserDevices();
+        }
+        function closeDevicesModal() {
+            document.getElementById("user-devices-modal").style.display = "none";
+            currentViewingUid = null;
+        }
+
+  function renderUserDevices() {
+            if (!currentViewingUid) return;
+            const container = document.getElementById("user-devices-list");
+            const user = allUsers[currentViewingUid];
+            const devices = user.devices || {};
+            const activeId = user.activeDevice;
+            
+            container.innerHTML = "";
+            
+            // Если устройств 0, показываем красивую заглушку
+            if (Object.keys(devices).length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <i data-feather="monitor" style="width: 60px; height: 60px; color: var(--border-color); margin-bottom: 15px;"></i>
+                        <h3 style="color: var(--text-dark); margin-bottom: 10px;">Нет активных сессий</h3>
+                        <p style="color: var(--text-light); font-size: 15px;">Пользователь еще ни разу не входил в систему, поэтому история устройств пуста.</p>
+                    </div>
+                `;
+                feather.replace();
+                return;
+            }
+
+            // Сортируем: сначала активные (текущие), потом остальные по дате
+            const sortedDevIds = Object.keys(devices).sort((a, b) => {
+                if (a === activeId) return -1;
+                if (b === activeId) return 1;
+                return new Date(devices[b].lastActive || 0) - new Date(devices[a].lastActive || 0);
+            });
+
+            for (const devId of sortedDevIds) {
+                const dev = devices[devId];
+                const isActive = (devId === activeId);
+                const dateText = dev.lastActive ? new Date(dev.lastActive).toLocaleString('ru-RU') : 'Неизвестно';
+
+                const card = document.createElement('div');
+                card.className = "device-main-wrapper";
+                
+                // Добавил отображение точной Модели, ОС и ID Устройства (devId)
+                card.innerHTML = `
+                    ${isActive ? '<span style="position:absolute; top:12px; right:12px; background:var(--primary-color); color:white; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold;">🟢 Сейчас онлайн</span>' : ''}
+                    <h4 style="margin-bottom: 5px; color: var(--text-dark); font-size: 16px;">${dev.model || 'Неизвестная модель'}</h4>
+                    <p style="color: var(--text-light); font-size: 13px; margin-bottom: 15px;">Последняя активность: ${dateText}</p>
+                    
+                    <div class="device-info-grid">
+                        <div class="device-card"><div class="device-card-icon"><i data-feather="monitor"></i></div><div class="device-card-content"><span class="device-card-label">ОС</span><strong class="device-card-value" title="${dev.os || 'Неизвестно'}">${dev.os || 'Неизвестно'}</strong></div></div>
+                        <div class="device-card"><div class="device-card-icon"><i data-feather="globe"></i></div><div class="device-card-content"><span class="device-card-label">Браузер</span><strong class="device-card-value" title="${dev.browser || 'Неизвестно'}">${dev.browser || 'Неизвестно'}</strong></div></div>
+                        <div class="device-card"><div class="device-card-icon"><i data-feather="wifi"></i></div><div class="device-card-content"><span class="device-card-label">IP Адрес</span><strong class="device-card-value">${dev.ip || '-'}</strong></div></div>
+                        <div class="device-card"><div class="device-card-icon"><i data-feather="hash"></i></div><div class="device-card-content"><span class="device-card-label">ID Устройства</span><strong class="device-card-value" title="${devId}">${devId}</strong></div></div>
+                    </div>
+
+                    <button class="btn-primary" onclick="removeDevice('${currentViewingUid}', '${devId}', ${isActive})" style="background-color: var(--red); border:none; width: 100%; margin-top:15px;">
+                        <i data-feather="trash-2" class="icon-small"></i> ${isActive ? 'Завершить эту сессию (Выкинуть)' : 'Удалить из истории'}
+                    </button>
+                `;
+                container.appendChild(card);
+            }
+            feather.replace();
+        }
+        // Глобальная функция для кнопки удаления девайса
+        window.removeDevice = function(uid, devId, isActive) {
+            if (confirm(isActive ? "Внимание! Вы закроете текущую сессию пользователя. Он будет разлогинен. Продолжить?" : "Удалить это устройство из истории?")) {
+                db.ref(`/users/${uid}/devices/${devId}`).remove();
+                if (isActive) db.ref(`/users/${uid}/activeDevice`).remove();
+                showToast("Устройство удалено.", "info");
+                setTimeout(renderUserDevices, 300); // Перерисовываем модалку
+            }
+        };
+
+        // ==========================================
+        // ШАБЛОНЫ (ДОБАВЛЕНИЕ, РЕНДЕР, УПРАВЛЕНИЕ)
+        // ==========================================
+        function getTagColor(tag) { let hash = 0; for (let i = 0; i < tag.length; i++) hash = tag.charCodeAt(i) + ((hash << 5) - hash); return `tag-color-${Math.abs(hash % 6)}`; }
+        
+        function checkCardOverflow(card) {
+            const body = card.querySelector('.card-body');
+            const activeContent = card.querySelector('.lang-content.active');
+            if (!body || !activeContent) return;
+            const expander = body.querySelector('.card-body-expander');
+            
+            const isExpanded = body.classList.contains('expanded');
+            expander.classList.remove('visible');
+            body.classList.remove('is-truncated'); 
+
+            if (activeContent.scrollHeight > 120) {
+                expander.classList.add('visible');
+                if (isExpanded) {
+                    expander.textContent = "Свернуть"; 
+                    body.classList.remove('is-truncated'); 
+                } else {
+                    expander.textContent = "Развернуть";
+                    body.classList.add('is-truncated');
+                }
+            } else {
+                expander.classList.remove('visible');
+                body.classList.remove('is-truncated');
+                body.classList.remove('expanded'); 
+            }
+        }
+
+        function updateCardLanguage(cardElement, newLang) {
+            if (!cardElement) return;
+            const otherLang = (newLang === 'ru') ? 'tj' : 'ru';
+            const contentNew = cardElement.querySelector(`.lang-content[data-content="${newLang}"]`);
+            const contentOld = cardElement.querySelector(`.lang-content[data-content="${otherLang}"]`);
+            if (contentNew) contentNew.classList.add('active');
+            if (contentOld) contentOld.classList.remove('active');
+            const toggleBtn = cardElement.querySelector('.card-lang-toggle');
+            if (toggleBtn) {
+                toggleBtn.dataset.lang = otherLang;
+                toggleBtn.textContent = otherLang.toUpperCase();
+            }
+            checkCardOverflow(cardElement); 
+        }
+
+        function renderAllLists() {
+            renderTemplates(document.getElementById("admin-template-list"), 'all');
+            renderTemplates(document.getElementById("favorites-template-list"), 'favorites');
+        }
+
+        function renderTemplates(targetListElement, filterMode) {
+            targetListElement.style.display = "grid";
+            targetListElement.innerHTML = "";
+            
+            let filteredTemplates = [];
+            for (const id in allTemplates) filteredTemplates.push({ id: id, ...allTemplates[id] });
+            
+            if (filterMode === 'favorites') filteredTemplates = filteredTemplates.filter(t => t.favorites && t.favorites[currentUser.uid]);
+            
+            if (currentFilters.title) {
+                const searchTerm = currentFilters.title;
+                filteredTemplates = filteredTemplates.filter(t => {
+                    const titleMatch = (t.title || '').toLowerCase().includes(searchTerm);
+                    const textRuMatch = (t.text_ru || '').toLowerCase().includes(searchTerm);
+                    const textTjMatch = (t.text_tj || '').toLowerCase().includes(searchTerm);
+                    const tagsMatch = t.tags && t.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+                    const author = allUsers[t.authorId];
+                    const authorName = author ? author.name.toLowerCase() : "";
+                    return titleMatch || textRuMatch || textTjMatch || tagsMatch || authorName.includes(searchTerm);
+                });
+            }
+            
+            if (currentFilters.tag !== 'all') filteredTemplates = filteredTemplates.filter(t => t.tags && t.tags.includes(currentFilters.tag));
+            if (currentFilters.author !== 'all') filteredTemplates = filteredTemplates.filter(t => t.authorId === currentFilters.author);
+            
+            filteredTemplates.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            if (filteredTemplates.length === 0) {
+                targetListElement.innerHTML = `<p>${filterMode === 'favorites' ? 'В избранном пусто.' : 'Шаблоны не найдены.'}</p>`;
+                targetListElement.style.display = "block";
+                return;
+            }
+
+            filteredTemplates.forEach(template => {
+                const author = allUsers[template.authorId];
+                const authorName = author ? author.name : "Неизвестно";
+                const isFavorite = template.favorites && template.favorites[currentUser.uid];
+                const tagsHtml = (template.tags || []).map(tag => `<span class="tag ${getTagColor(tag)}">${tag}</span>`).join("");
+                const activeLang = currentGlobalLang;
+                const inactiveLang = (currentGlobalLang === 'tj') ? 'ru' : 'tj';
+
+                const card = document.createElement("div");
+                card.className = "template-card";
+                card.setAttribute("data-id", template.id);
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h4>${template.title}</h4>
+                        <button class="card-lang-toggle" data-action="toggle-lang" data-lang="${inactiveLang}" title="Сменить язык">${inactiveLang.toUpperCase()}</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="lang-content ${activeLang === 'tj' ? 'active' : ''}" data-content="tj">${template.text_tj}</div>
+                        <div class="lang-content ${activeLang === 'ru' ? 'active' : ''}" data-content="ru">${template.text_ru}</div>
+                        <div class="card-body-expander" data-action="expand">Развернуть</div>
+                    </div>
+                    <div class="card-footer">
+                        ${tagsHtml ? `<div class="card-tags">${tagsHtml}</div>` : ''}
+                        <div class="card-meta">
+                            <div class="card-author" title="Добавил: ${authorName}"><i data-feather="user" class="icon-small"></i></div>
+                            <div class="card-footer-actions">
+                                <span class="card-favorite ${isFavorite ? 'favorited' : ''}" data-action="favorite" title="В избранное"><i data-feather="star" class="icon-small"></i></span>
+                                <button class="card-action-btn" data-action="edit" title="Редактировать"><i data-feather="edit-2" class="icon-small"></i></button>
+                                <button class="card-action-btn" data-action="delete" title="Удалить"><i data-feather="trash-2" class="icon-small"></i></button>
+                                <button class="card-action-btn" data-action="copy" title="Копировать"><i data-feather="copy" class="icon-small"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                targetListElement.appendChild(card);
+                checkCardOverflow(card);
+            });
+            feather.replace();
+        }
+
+        function handleCardClick(e) {
+            const card = e.target.closest(".template-card");
+            if (!card) return;
+            const templateId = card.getAttribute("data-id");
+            const template = allTemplates[templateId];
+            if (!template) return;
+            
+            const actionTarget = e.target.closest("[data-action]");
+            if (!actionTarget) return;
+            const action = actionTarget.dataset.action;
+
+            switch (action) {
+                case 'expand':
+                    const body = card.querySelector('.card-body');
+                    const expander = card.querySelector('.card-body-expander');
+                    const shouldExpand = !body.classList.contains('expanded');
+                    body.classList.toggle('expanded', shouldExpand);
+                    body.classList.toggle('is-truncated', !shouldExpand);
+                    expander.textContent = shouldExpand ? "Свернуть" : "Развернуть";
+                    break;
+                case 'toggle-lang':
+                    currentGlobalLang = (currentGlobalLang === 'tj') ? 'ru' : 'tj';
+                    document.querySelectorAll('.template-card').forEach(c => updateCardLanguage(c, currentGlobalLang));
+                    break;
+                case 'edit':
+                    openTemplateModal('edit', templateId, template);
+                    break;
+                case 'delete':
+                    if (confirm(`Удалить шаблон "${template.title}"?`)) db.ref('templates/' + templateId).remove().then(() => showToast("Шаблон удален", "info"));
+                    break;
+                case 'favorite':
+                    const isFav = template.favorites && template.favorites[currentUser.uid];
+                    db.ref(`templates/${templateId}/favorites/${currentUser.uid}`).set(isFav ? null : true);
+                    break;
+                case 'copy':
+                    navigator.clipboard.writeText(card.querySelector(".lang-content.active").textContent).then(() => {
+                        actionTarget.style.color = "var(--primary-color)";
+                        setTimeout(() => { actionTarget.style.color = "var(--text-light)"; }, 1500);
+                    });
+                    break;
+            }
+        }
+
+        function openTemplateModal(mode, id = null, data = {}) {
+            const modal = document.getElementById("template-modal");
+            document.getElementById("modal-title").textContent = mode === 'edit' ? "Изменить шаблон" : "Добавить шаблон";
+            document.getElementById("admin-template-id").value = id || "";
+            document.getElementById("admin-template-title").value = data.title || "";
+            document.getElementById("admin-template-tj").value = data.text_tj || "";
+            document.getElementById("admin-template-ru").value = data.text_ru || "";
+            document.getElementById("admin-template-tags").value = data.tags ? data.tags.join(", ") : "";
+            modal.style.display = "grid";
+        }
+        
+        function closeTemplateModal() { document.getElementById("template-modal").style.display = "none"; }
+
+        function handleAdminFormSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById("admin-template-id").value;
+            let title = document.getElementById("admin-template-title").value.trim();
+            const textTj = document.getElementById("admin-template-tj").value.trim();
+            if (!title) title = textTj.substring(0, 40) + (textTj.length > 40 ? "..." : "");
+            if (!title) title = "Без названия";
+
+            const data = { 
+                title, 
+                text_ru: document.getElementById("admin-template-ru").value, 
+                text_tj: textTj, 
+                tags: document.getElementById("admin-template-tags").value.split(",").map(t=>t.trim()).filter(t=>t) 
+            };
+
+            if (id) {
+                db.ref('templates/' + id).update(data).then(()=>{ closeTemplateModal(); showToast("Шаблон обновлен", "success"); });
+            } else { 
+                data.authorId = currentUser.uid; data.createdAt = new Date().toISOString(); 
+                db.ref('templates').push(data).then(()=>{ closeTemplateModal(); showToast("Шаблон добавлен", "success"); }); 
+            }
+        }
+
+        function openRejectionModal(uid) { document.getElementById("rejection-user-id").value = uid; document.getElementById("rejection-modal").style.display = "grid"; }
+        function closeRejectionModal() { document.getElementById("rejection-modal").style.display = "none"; document.getElementById("rejection-form").reset(); }
+        function handleRejectionSubmit(e) { e.preventDefault(); handleUserApproval(document.getElementById("rejection-user-id").value, 'rejected', document.getElementById("rejection-reason-input").value); }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById("toast-container");
+            const t = document.createElement("div"); 
+            t.className = `toast ${type}`; t.textContent = message;
+            container.appendChild(t);
+            setTimeout(() => t.classList.add("show"), 10);
+            setTimeout(() => { t.classList.remove("show"); setTimeout(() => { if (container.contains(t)) t.remove(); }, 500); }, 3000);
+        }
+    });
+    </script>
+</body>
+</html>

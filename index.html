@@ -462,51 +462,166 @@
         let currentUserRole = null; 
         const LOGOUT_TIME_MS = 12 * 60 * 60 * 1000; // 12 hours
 
-     // Генератор ID устройства
-function getDeviceInfo() {
-    let id = localStorage.getItem('deviceId');
-    if (!id) { id = 'dev_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('deviceId', id); }
-    return { id: id, info: navigator.platform + ' (' + new Date().toLocaleDateString() + ')' };
-}
+// ==========================================
+        // 1. АНАЛИЗАТОР УСТРОЙСТВА (ПРОДВИНУТЫЙ ТРЕКЕР)
+        // ==========================================
+        async function getExtendedDeviceInfo() {
+            const ua = navigator.userAgent;
+            let browser = "Неизвестно"; 
+            let os = "Неизвестно"; 
+            let model = "ПК / Ноутбук";
 
+            if (ua.includes("YaBrowser/")) browser = "Yandex Browser";
+            else if (ua.includes("OPR/") || ua.includes("Opera/")) browser = "Opera";
+            else if (ua.includes("Edg/")) browser = "Microsoft Edge";
+            else if (ua.includes("Firefox/")) browser = "Mozilla Firefox";
+            else if (ua.includes("SamsungBrowser/")) browser = "Samsung Internet";
+            else if (ua.includes("Chrome/") || ua.includes("CriOS/")) browser = "Google Chrome";
+            else if (ua.includes("Safari/") && !ua.includes("Chrome")) browser = "Apple Safari";
+
+            let isAndroid = /Android/i.test(ua);
+            if (!isAndroid && /Linux/i.test(ua)) {
+                if ((navigator.userAgentData && navigator.userAgentData.platform === "Android") || 
+                    (navigator.platform && /arm|aarch/i.test(navigator.platform))) { isAndroid = true; }
+            }
+
+            if (isAndroid) {
+                os = "Android";
+                model = "Смартфон";
+                if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+                    try {
+                        const hints = await navigator.userAgentData.getHighEntropyValues(['platformVersion', 'model']);
+                        if (hints.model) model = hints.model;
+                        if (hints.platformVersion) os = `Android ${hints.platformVersion.split('.')[0]}`;
+                    } catch (e) { console.error(e); }
+                }
+                if (os === "Android") {
+                    const androidMatch = ua.match(/Android\s([0-9\.]+)/i);
+                    if (androidMatch) os = `Android ${androidMatch[1]}`;
+                }
+                if (model === "Смартфон") {
+                    const modelMatch = ua.match(/Android.*?; (.*?)(?:\sBuild\/|\))/i);
+                    if (modelMatch && modelMatch[1] && !['wv', 'K', 'X11'].includes(modelMatch[1])) {
+                        model = modelMatch[1].replace(/^[a-z]{2}-[a-z]{2};\s*/i, '').trim();
+                    }
+                }
+            } 
+            else if (/iPhone/i.test(ua)) {
+                model = "Apple iPhone";
+                const iosMatch = ua.match(/OS (\d+[_]\d+[_]?\d*) like Mac OS X/);
+                os = iosMatch ? `iOS ${iosMatch[1].replace(/_/g, '.')}` : "iOS";
+            } 
+            else if (/iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+                model = "Apple iPad";
+                os = "iPadOS";
+            } 
+            else if (/Windows NT/i.test(ua)) {
+                model = "Компьютер (Windows)";
+                if (ua.includes("Windows NT 10.0")) os = "Windows 10 / 11";
+                else if (ua.includes("Windows NT 6.3")) os = "Windows 8.1";
+                else if (ua.includes("Windows NT 6.2")) os = "Windows 8";
+                else if (ua.includes("Windows NT 6.1")) os = "Windows 7";
+                else os = "Windows";
+            } 
+            else if (/Mac OS X/i.test(ua)) {
+                model = "Apple Mac";
+                const macMatch = ua.match(/Mac OS X (\d+[._]\d+[._]?\d*)/);
+                os = macMatch ? `macOS ${macMatch[1].replace(/_/g, '.')}` : "macOS";
+            } 
+            else if (/Linux/i.test(ua)) {
+                os = "Linux";
+                model = "ПК (Linux)";
+            }
+
+            let id = localStorage.getItem('deviceId');
+            if (!id || !/^\d+$/.test(id)) { 
+                id = Date.now().toString() + Math.floor(1000 + Math.random() * 9000).toString();
+                localStorage.setItem('deviceId', id);
+            }
+
+            return { id, os, browser, model };
+        }
 let appInitialized = false;
 
-auth.onAuthStateChanged(user => {
-    if (user) {
-        const loginTimeKey = 'loginTime_' + user.uid;
-        const loginTime = localStorage.getItem(loginTimeKey);
-        if (!loginTime) { localStorage.setItem(loginTimeKey, Date.now()); } 
-        else if (Date.now() - parseInt(loginTime) > LOGOUT_TIME_MS) {
-            auth.signOut(); localStorage.removeItem(loginTimeKey); return;
-        }
+        // ==========================================
+        // 2. АВТОРИЗАЦИЯ И ЗАПИСЬ СЕССИИ (СТРОГО 1 УСТРОЙСТВО)
+        // ==========================================
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                const loginTimeKey = 'loginTime_' + user.uid;
+                const loginTime = localStorage.getItem(loginTimeKey);
+                if (!loginTime) { localStorage.setItem(loginTimeKey, Date.now()); } 
+                else if (Date.now() - parseInt(loginTime) > LOGOUT_TIME_MS) {
+                    auth.signOut(); localStorage.removeItem(loginTimeKey); return;
+                }
 
-        // БЛОК ПРОВЕРКИ УСТРОЙСТВА
-        const deviceInfo = getDeviceInfo();
-        database.ref('/users/' + user.uid + '/device').on('value', snap => {
-            const activeDevice = snap.val();
-            // Если устройства нет или это наше текущее устройство
-            if (!activeDevice || activeDevice.id === deviceInfo.id) {
-                document.getElementById('device-conflict-modal').style.display = 'none';
-                if (!activeDevice) {
-                    database.ref('/users/' + user.uid + '/device').set(deviceInfo);
+                try {
+                    // 1. Получаем полные данные о текущем устройстве
+                    const devInfo = await getExtendedDeviceInfo();
+                    
+                    // 2. Слушаем, какое устройство сейчас считается "Активным" в базе
+                    database.ref('/users/' + user.uid + '/activeDevice').on('value', async snap => {
+                        const activeDeviceId = snap.val();
+
+                        // СИТУАЦИЯ А: Активного устройства нет, либо это наше текущее устройство -> ПУСКАЕМ
+                        if (!activeDeviceId || activeDeviceId === devInfo.id) {
+                            document.getElementById('device-conflict-modal').style.display = 'none';
+
+                            // Записываем данные в базу
+                            const deviceRef = database.ref(`/users/${user.uid}/devices/${devInfo.id}`);
+                            let ipAddress = '-';
+                            try {
+                                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                                const ipData = await ipResponse.json();
+                                ipAddress = ipData.ip;
+                            } catch (e) { console.warn("Не удалось получить IP"); }
+
+                            await deviceRef.update({
+                                os: devInfo.os, 
+                                browser: devInfo.browser, 
+                                model: devInfo.model, 
+                                ip: ipAddress,
+                                lastActive: new Date().toISOString()
+                            });
+
+                            if (!activeDeviceId) {
+                                await database.ref(`/users/${user.uid}/activeDevice`).set(devInfo.id);
+                            }
+
+                            if (!appInitialized) {
+                                appInitialized = true;
+                                fetchDataAndInitialize(user); // Запускаем приложение
+                            }
+                        } 
+                        // СИТУАЦИЯ Б: В базе записано ДРУГОЕ устройство -> БЛОКИРУЕМ И ПОКАЗЫВАЕМ ОКНО
+                        else {
+                            document.getElementById('device-conflict-modal').style.display = 'flex';
+                            
+                            // Логика кнопки "Удалить другое устройство и войти"
+                            document.getElementById('btn-force-login').onclick = async () => {
+                                // Удаляем старое устройство из базы
+                                await database.ref(`/users/${user.uid}/devices/${activeDeviceId}`).remove();
+                                // Делаем наше устройство главным (это перезапустит проверку и пустит нас)
+                                await database.ref(`/users/${user.uid}/activeDevice`).set(devInfo.id);
+                            };
+                        }
+                    });
+
+                    // 3. Килл-свитч: Если админ выкинет НАС (удалит наше устройство из базы)
+                    database.ref(`/users/${user.uid}/devices/${devInfo.id}`).on('value', snapshot => {
+                        if (appInitialized && !snapshot.exists()) {
+                            auth.signOut().then(() => { window.location.href = "login.html"; });
+                        }
+                    });
+
+                } catch (error) {
+                    console.error("Ошибка при проверке устройства:", error);
                 }
-                if (!appInitialized) {
-                    appInitialized = true;
-                    fetchDataAndInitialize(user); // Запуск приложения
-                }
+
             } else {
-                // Если зашли с другого устройства
-                document.getElementById('device-conflict-modal').style.display = 'flex';
-                document.getElementById('btn-force-login').onclick = () => {
-                    // Перехватываем сессию на себя
-                    database.ref('/users/' + user.uid + '/device').set(deviceInfo);
-                };
+                window.location.href = 'login.html?redirect=index.html';
             }
         });
-    } else {
-        window.location.href = 'login.html?redirect=index.html';
-    }
-});
         // --- 4. FETCH DATA & INITIALIZE APP ---
         function fetchDataAndInitialize(user) {
             database.ref('/users/' + user.uid).once('value').then(roleSnapshot => {

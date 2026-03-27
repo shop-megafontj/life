@@ -134,7 +134,7 @@
             overflow-x: hidden; 
             display: flex; 
             flex-direction: column; 
-            transition: width 0.3s ease, transform 0.3s ease, padding 0.3s ease; /* V32: Добавлено padding */
+            transition: width 0.3s ease, transform 0.3s ease, padding 0.3s ease;
         }
         .app-sidebar nav { 
             display: flex; flex-direction: column; gap: 8px; 
@@ -168,7 +168,7 @@
             margin-top: auto;
             padding-top: 20px;
             border-top: 1px solid var(--border-color);
-            transition: border 0.3s ease, padding 0.3s ease; /* V32: Добавлено padding */
+            transition: border 0.3s ease, padding 0.3s ease; 
         }
         .sidebar-toggle {
             background: var(--bg-main);
@@ -451,7 +451,6 @@
             }
             body.sidebar-collapsed .app-sidebar {
                 width: var(--sidebar-width-collapsed);
-                /* V32-Fix: Уменьшаем padding, чтобы иконки поместились */
                 padding-left: 10px;
                 padding-right: 10px;
             }
@@ -467,7 +466,6 @@
                 pointer-events: none;
             }
             body.sidebar-collapsed .sidebar-toggle-wrapper {
-                /* V32-Fix: Уменьшаем padding-top и прячем рамку */
                 padding-top: 20px; 
                 border-top-color: transparent;
             }
@@ -483,62 +481,130 @@
         }
         
       /* --- V35 FIX: Исправленная логика свернутого меню --- */
-@media (min-width: 901px) {
-    /* 1. Изменяем ширину сетки */
-    body.sidebar-collapsed .app-container {
-        grid-template-columns: var(--sidebar-width-collapsed) 1fr;
-    }
-
-    /* 2. Настройка самой панели */
-    body.sidebar-collapsed .app-sidebar {
-        width: var(--sidebar-width-collapsed);
-        padding: 20px 0; /* Убираем боковые отступы, центрируем через flex */
-        align-items: center; /* Принудительно центрируем всё содержимое */
-    }
-
-    /* 3. Настройка контейнера навигации */
-    body.sidebar-collapsed .app-sidebar nav {
-        width: 100%;
-        align-items: center; /* Центрируем ссылки внутри nav */
-    }
-
-    /* 4. Ссылки превращаем в квадратные кнопки */
-    body.sidebar-collapsed .app-sidebar nav a {
-        justify-content: center; /* Центрируем иконку внутри ссылки */
-        padding: 0;              /* Убираем внутренние отступы */
-        width: 50px;             /* Фиксированная ширина */
-        height: 50px;            /* Фиксированная высота */
-        margin: 0 auto 8px auto; /* Центрируем саму кнопку и даем отступ снизу */
-        border-radius: 14px;
-    }
-
-    /* 5. ГЛАВНОЕ ИСПРАВЛЕНИЕ: Полностью удаляем текст из потока */
-    body.sidebar-collapsed .nav-link-text {
-        display: none !important; 
-    }
-
-    /* 6. Кнопка сворачивания */
-    body.sidebar-collapsed .sidebar-toggle-wrapper {
-        padding-top: 20px;
-        border-top: none;
-        width: 100%;
-        display: flex;
-        justify-content: center; /* Центрируем кнопку */
-    }
-
-    body.sidebar-collapsed .sidebar-toggle {
-        margin: 0;
-    }
-
-    body.sidebar-collapsed .sidebar-toggle .icon {
-        transform: rotate(180deg);
-    }
-
-    body.sidebar-collapsed .header-left {
-        gap: 15px;
-    }
+        @media (min-width: 901px) {
+            body.sidebar-collapsed .app-container {
+                grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+            }
+            body.sidebar-collapsed .app-sidebar {
+                width: var(--sidebar-width-collapsed);
+                padding: 20px 0; 
+                align-items: center; 
+            }
+            body.sidebar-collapsed .app-sidebar nav {
+                width: 100%;
+                align-items: center; 
+            }
+            body.sidebar-collapsed .app-sidebar nav a {
+                justify-content: center; 
+                padding: 0;              
+                width: 50px;             
+                height: 50px;            
+                margin: 0 auto 8px auto; 
+                border-radius: 14px;
+            }
+            body.sidebar-collapsed .nav-link-text {
+                display: none !important; 
+            }
+            body.sidebar-collapsed .sidebar-toggle-wrapper {
+                padding-top: 20px;
+                border-top: none;
+                width: 100%;
+                display: flex;
+                justify-content: center; 
+            }
+            body.sidebar-collapsed .sidebar-toggle {
+                margin: 0;
+            }
+            body.sidebar-collapsed .sidebar-toggle .icon {
+                transform: rotate(180deg);
+            }
+            body.sidebar-collapsed .header-left {
+                gap: 15px;
+            }
+        }
+        /* --- СТИЛИ ДЛЯ КАРТОЧЕК УСТРОЙСТВ --- */
+.device-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+    margin-bottom: 25px;
 }
-
+.device-card {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    gap: 15px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.device-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+}
+.device-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    background: var(--white);
+    border-radius: 12px;
+    color: var(--primary-color);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    flex-shrink: 0;
+}
+[data-theme="dark"] .device-card-icon { background: var(--bg-sidebar); }
+.device-card-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.device-card-label {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+.device-card-value {
+    font-size: 15px;
+    color: var(--text-dark);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* --- СТИЛИ ДЛЯ СПИСКА УСТРОЙСТВ --- */
+.device-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+.device-card {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    gap: 15px;
+}
+.device-card-icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; background: var(--white);
+    border-radius: 10px; color: var(--primary-color);
+    box-shadow: var(--shadow-light); flex-shrink: 0;
+}
+[data-theme="dark"] .device-card-icon { background: var(--bg-sidebar); }
+.device-card-content { display: flex; flex-direction: column; overflow: hidden; }
+.device-card-label { font-size: 11px; color: var(--text-light); text-transform: uppercase; font-weight: 600; margin-bottom: 3px; }
+.device-card-value { font-size: 14px; color: var(--text-dark); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.device-main-card { position: relative; padding-top: 40px; }
     </style>
 </head>
 <body>
@@ -579,6 +645,11 @@
                 <a href="#" class="nav-link" data-target="favorites-page">
                     <i data-feather="star" class="icon"></i> 
                     <span class="nav-link-text">Избранное</span>
+                </a>
+                <!-- Исправлено: добавил nav-link и span для корректной навигации -->
+                <a href="#" class="nav-link" data-target="devices-section">
+                    <i data-feather="monitor" class="icon"></i> 
+                    <span class="nav-link-text">Устройства</span>
                 </a>
                 <a href="#" class="nav-link" data-target="profile-page">
                     <i data-feather="user" class="icon"></i> 
@@ -635,6 +706,17 @@
                 <div class="template-grid" id="favorites-template-list" style="display: none;"></div>
             </div>
 
+  <div id="devices-section" class="page-section">
+                <div class="content-header"><h2>Управление устройствами</h2></div>
+                
+                <!-- ВОТ ЭТОТ КОНТЕЙНЕР КРИТИЧЕСКИ ВАЖЕН. СЮДА JS БУДЕТ ВСТАВЛЯТЬ КАРТОЧКИ -->
+                <div id="devices-list-container" style="display: flex; flex-direction: column; gap: 20px; max-width: 800px;">
+                    <!-- Тут пока пусто, всё сделает скрипт -->
+                </div>
+            </div>
+
+
+
             <div id="profile-page" class="page-section">
                 <div class="content-header"><h2>Ваш профиль</h2></div>
                 
@@ -687,17 +769,17 @@
             </div>
         </div>
     </div>
-    
+
     <script>
       const firebaseConfig = {
-  apiKey: "AIzaSyDiT7lVckjmU6UGWsFZQnk-4mDMSXSI2vA",
-  authDomain: "life-a79ef.firebaseapp.com",
-  projectId: "life-a79ef",
-  storageBucket: "life-a79ef.firebasestorage.app",
-  messagingSenderId: "1024688234300",
-  appId: "1:1024688234300:web:94f2bb9b46b3163be34839",
-  measurementId: "G-BHKK3JEQ1G"
-};
+          apiKey: "AIzaSyDiT7lVckjmU6UGWsFZQnk-4mDMSXSI2vA",
+          authDomain: "life-a79ef.firebaseapp.com",
+          projectId: "life-a79ef",
+          storageBucket: "life-a79ef.firebasestorage.app",
+          messagingSenderId: "1024688234300",
+          appId: "1:1024688234300:web:94f2bb9b46b3163be34839",
+          measurementId: "G-BHKK3JEQ1G"
+      };
     </script>
     
     <script>
@@ -743,56 +825,294 @@
         let currentFilters = { title: '', tag: 'all', author: 'all' };
         let allAvailableTags = new Set();
         let currentGlobalLang = 'tj';
+      
+      // ==========================================
+        // 1. АНАЛИЗАТОР УСТРОЙСТВА (ПРОДВИНУТЫЙ ТРЕКЕР)
+        // ==========================================
+        function getExtendedDeviceInfo() {
+            const ua = navigator.userAgent;
+            let browser = "Неизвестно"; 
+            let os = "Неизвестно"; 
+            let model = "ПК / Ноутбук";
+
+            // --- 1. Точное определение браузера ---
+            if (ua.includes("YaBrowser/")) browser = "Yandex Browser";
+            else if (ua.includes("OPR/") || ua.includes("Opera/")) browser = "Opera";
+            else if (ua.includes("Edg/")) browser = "Microsoft Edge";
+            else if (ua.includes("Firefox/")) browser = "Mozilla Firefox";
+            else if (ua.includes("Chrome/") || ua.includes("CriOS/")) browser = "Google Chrome";
+            else if (ua.includes("Safari/") && !ua.includes("Chrome")) browser = "Apple Safari";
+
+            // --- 2. Точное определение ОС и Модели ---
+            if (/Windows NT/i.test(ua)) {
+                model = "Компьютер (Windows)";
+                if (ua.includes("Windows NT 10.0")) os = "Windows 10 / 11";
+                else if (ua.includes("Windows NT 6.3")) os = "Windows 8.1";
+                else if (ua.includes("Windows NT 6.2")) os = "Windows 8";
+                else if (ua.includes("Windows NT 6.1")) os = "Windows 7";
+                else os = "Windows";
+            } else if (/Mac OS X/i.test(ua) && !/iPhone|iPad/i.test(ua)) {
+                model = "Apple Mac";
+                // Вытаскиваем версию macOS (например, 10.15.7)
+                const macMatch = ua.match(/Mac OS X (\d+[._]\d+[._]?\d*)/);
+                os = macMatch ? `macOS ${macMatch[1].replace(/_/g, '.')}` : "macOS";
+            } else if (/Android/i.test(ua)) {
+                // Вытаскиваем версию Android
+                const androidMatch = ua.match(/Android (\d+(\.\d+)?)/);
+                os = androidMatch ? `Android ${androidMatch[1]}` : "Android";
+                
+                // Вытаскиваем точную модель телефона (обычно идет перед словом Build)
+                const modelMatch = ua.match(/Android.*?; (.*?)( Build\/|\))/);
+                if (modelMatch && modelMatch[1]) {
+                    // Убираем лишние языковые метки типа "ru-ru;" если они попались
+                    model = modelMatch[1].replace(/^[a-z]{2}-[a-z]{2};\s*/i, '').trim();
+                } else {
+                    model = "Android Смартфон";
+                }
+            } else if (/iPhone/i.test(ua)) {
+                model = "Apple iPhone";
+                const iosMatch = ua.match(/OS (\d+[_]\d+[_]?\d*) like Mac OS X/);
+                os = iosMatch ? `iOS ${iosMatch[1].replace(/_/g, '.')}` : "iOS";
+            } else if (/iPad/i.test(ua)) {
+                model = "Apple iPad";
+                os = "iPadOS";
+            } else if (/Linux/i.test(ua)) {
+                os = "Linux";
+                model = "ПК (Linux)";
+            }
+
+            // --- 3. Генерация ID только из ЦИФР ---
+            let id = localStorage.getItem('deviceId');
+            
+            // Если ID нет или он содержит буквы (старый формат dev_xxxx), создаем новый чисто цифровой
+            if (!id || !/^\d+$/.test(id)) { 
+                // Создаем ID из текущего времени в миллисекундах + 4 случайные цифры
+                // Получится что-то вроде: 17115324001238492
+                id = Date.now().toString() + Math.floor(1000 + Math.random() * 9000).toString();
+                localStorage.setItem('deviceId', id);
+            }
+
+            return { id, os, browser, model };
+        }
         
-        // ================================================
-        // ====      ЛОГИКА ВХОДА (V32)                ====
-        // ================================================
-        
+// ==========================================
+        // 2. АВТОРИЗАЦИЯ ОПЕРАТОРА И ЗАПИСЬ СЕССИИ
+        // ==========================================
         auth.onAuthStateChanged(user => {
             if (user) {
-                db.ref('/users/' + user.uid).once('value', snapshot => {
-                    if (snapshot.exists()) {
-                        const userData = snapshot.val();
-                        
-                        if (userData.role === "admin") {
-                            window.location.href = "admin.html"; return;
-                        }
+                // ПИШЕМ УСТРОЙСТВО В БАЗУ ДАННЫХ
+                const devInfo = getExtendedDeviceInfo();
+                const deviceRef = db.ref(`/users/${user.uid}/devices/${devInfo.id}`);
+                
+                deviceRef.update({
+                    os: devInfo.os, 
+                    browser: devInfo.browser, 
+                    model: devInfo.model, 
+                    lastActive: new Date().toISOString()
+                });
+                db.ref(`/users/${user.uid}/activeDevice`).set(devInfo.id);
 
-                        const perms = userData.permissions || {};
-                        if (userData.role === "moderator" || perms.canApproveTemplates || perms.canManageAccess) {
-                            window.location.href = "moderator.html"; return;
-                        }
-                        
-                        db.ref('/users/' + user.uid).on('value', userSnapshot => {
-                            currentUser = { uid: user.uid, email: user.email, ...userSnapshot.val() };
-                            userPermissions = currentUser.permissions || {}; 
+                fetch('https://api.ipify.org?format=json')
+                    .then(r => r.json())
+                    .then(d => { deviceRef.update({ ip: d.ip }); })
+                    .catch(() => {});
 
-                            if (!window.listenersInitialized) {
-                                initOperatorPanel(); 
-                            }
-                            
-                            updateOperatorStatusUI(); 
-                            
-                            if (document.getElementById('profile-page').classList.contains('active')) {
-                                updateProfilePageFields(); 
-                            }
+                // ---> САМОЕ ГЛАВНОЕ: СЛУШАТЕЛЬ УДАЛЕНИЯ СЕССИИ <---
+                // Если админ удалит этот ID из базы, сработает этот код:
+                deviceRef.on('value', snapshot => {
+                    if (!snapshot.exists()) {
+                        // Сессия удалена! Разлогиниваем оператора.
+                        auth.signOut().then(() => {
+                            window.location.href = "login.html";
                         });
-
-                    } else {
-                        showToast("Ошибка: не найдены данные пользователя.", "error");
-                        auth.signOut();
                     }
-                }).catch(error => {
-                    console.error("Ошибка чтения данных:", error);
-                    showToast("Ошибка прав доступа к базе данных.", "error");
-                    auth.signOut();
+                });
+
+                // ЗАГРУЖАЕМ ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ
+                db.ref('/users/' + user.uid).once('value', snapshot => {
+                    const userData = snapshot.val();
+                    if (!userData) { auth.signOut(); return; }
+                    
+                    // Если сюда случайно зашел админ - перекидываем в админку
+                    if (userData.role === 'admin' || userData.isAdmin) {
+                        window.location.href = "admin.html";
+                        return;
+                    }
+                    
+                    currentUser = { uid: user.uid, email: user.email, ...userData };
+                    initOperatorPanel();
                 });
             } else {
                 window.location.href = "login.html";
             }
         });
 
-        // ================================================
+
+        function initOperatorPanel() {
+            if (window.listenersInitialized) return;
+            document.getElementById("operator-user-email").textContent = currentUser.email;
+
+            // Навигация
+            document.querySelectorAll(".nav-link").forEach(link => {
+                link.addEventListener("click", (e) => { e.preventDefault(); navigateToPage(link.getAttribute("data-target")); });
+            });
+            document.getElementById("operator-logout").addEventListener("click", () => auth.signOut());
+
+            // Мобильное меню
+            document.getElementById("hamburger-btn").addEventListener("click", () => { document.getElementById("app-sidebar").classList.toggle("visible"); document.getElementById("sidebar-overlay").style.display = "block"; });
+            document.getElementById("sidebar-overlay").addEventListener("click", () => { document.getElementById("app-sidebar").classList.remove("visible"); document.getElementById("sidebar-overlay").style.display = "none"; });
+
+            // Переключение тем
+            const themeSwitcher = document.getElementById("theme-switcher");
+            themeSwitcher.addEventListener('click', () => {
+                const currentTheme = localStorage.getItem('theme') || 'light';
+                setTeam(currentTheme === 'dark' ? 'light' : 'dark');
+            });
+            setTeam(localStorage.getItem('theme') || 'light');
+
+            // Поиск и фильтры
+            document.getElementById("title-search-input").addEventListener("input", handleSearch);
+            setupFilterListeners();
+
+            // Клик по карточкам шаблонов
+            document.getElementById("operator-template-list").addEventListener("click", handleCardClick);
+            document.getElementById("favorites-template-list").addEventListener("click", handleCardClick);
+
+            listenForTemplates();
+            renderDevicesList(currentUser.uid); // Рисуем устройства
+            navigateToPage("templates-page");
+            window.listenersInitialized = true;
+        }
+
+        function setTeam(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            document.querySelector('#theme-switcher i').setAttribute('data-feather', theme === 'dark' ? 'sun' : 'moon');
+            feather.replace();
+        }
+
+        function navigateToPage(targetId) {
+            document.querySelectorAll(".page-section").forEach(section => section.classList.toggle("active", section.id === targetId));
+            const activeLink = document.querySelector(`.nav-link[data-target="${targetId}"]`);
+            if (activeLink) {
+                document.getElementById("page-title").textContent = activeLink.textContent.trim();
+                document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+                activeLink.classList.add("active");
+            }
+            
+            const searchInput = document.getElementById('title-search-input');
+            const filterBar = document.getElementById('filter-bar');
+            
+            if (targetId === 'templates-page' || targetId === 'favorites-page') {
+                filterBar.style.display = 'flex'; searchInput.style.visibility = "visible";
+                renderAllLists();
+            } else {
+                filterBar.style.display = 'none'; searchInput.style.visibility = "hidden";
+            }
+            
+            if (window.innerWidth <= 900) {
+                document.getElementById("app-sidebar").classList.remove("visible");
+                document.getElementById("sidebar-overlay").style.display = "none";
+            }
+        }
+
+     // ==========================================
+        // 3. ОТРИСОВКА СПИСКА УСТРОЙСТВ ОПЕРАТОРА
+        // ==========================================
+        function renderDevicesList(uid) {
+            db.ref(`/users/${uid}/devices`).on('value', snap => {
+                const devices = snap.val() || {};
+                
+                db.ref(`/users/${uid}/activeDevice`).once('value').then(activeSnap => {
+                    const activeId = activeSnap.val() || localStorage.getItem('deviceId');
+                    const container = document.getElementById('devices-list-container');
+                    
+                    // Защита от ошибки, если HTML контейнер не найден
+                    if (!container) {
+                        console.error("ОШИБКА: Контейнер devices-list-container не найден в HTML!");
+                        return;
+                    }
+                    
+                    container.innerHTML = '';
+
+                    // Если устройств нет вообще
+                    if (Object.keys(devices).length === 0) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 40px 20px; background: var(--bg-main); border-radius: 12px; border: 1px dashed var(--border-color);">
+                                <i data-feather="monitor" style="width: 60px; height: 60px; color: var(--text-light); margin-bottom: 15px;"></i>
+                                <h3 style="color: var(--text-dark); margin-bottom: 10px;">Нет данных об устройствах</h3>
+                            </div>
+                        `;
+                        feather.replace();
+                        return;
+                    }
+
+                    const currentBrowserId = localStorage.getItem('deviceId');
+
+                    // Сортировка: текущее устройство всегда сверху
+                    const sortedIds = Object.keys(devices).sort((a, b) => (a === currentBrowserId ? -1 : 1));
+
+                    sortedIds.forEach(devId => {
+                        const dev = devices[devId];
+                        const isCurrentBrowser = (devId === currentBrowserId);
+                        
+                        const badge = isCurrentBrowser ? `<span style="position:absolute; top:12px; right:12px; background:var(--primary-color); color:white; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold;">🟢 Текущий сеанс</span>` : '';
+                        const dateText = dev.lastActive ? new Date(dev.lastActive).toLocaleString('ru-RU') : 'Неизвестно';
+
+                        const card = document.createElement('div');
+                        card.className = "device-main-wrapper form-container-card";
+                        card.style.margin = "0"; 
+                        card.style.position = "relative";
+                        
+                        card.innerHTML = `
+                            ${badge}
+                            <h3 style="margin-bottom: 5px; color: var(--primary-color); padding-right: 120px;">
+                                ${dev.model || 'ПК / Ноутбук'} ${isCurrentBrowser ? '<span style="color:#888; font-size:14px;">(Это устройство)</span>' : ''}
+                            </h3>
+                            <p style="color: var(--text-light); font-size: 13px; margin-bottom: 15px;">Последняя активность: ${dateText}</p>
+                            
+                            <div class="device-info-grid">
+                                <div class="device-card"><div class="device-card-icon"><i data-feather="monitor"></i></div><div class="device-card-content"><span class="device-card-label">ОС</span><strong class="device-card-value">${dev.os || 'Неизвестно'}</strong></div></div>
+                                <div class="device-card"><div class="device-card-icon"><i data-feather="globe"></i></div><div class="device-card-content"><span class="device-card-label">Браузер</span><strong class="device-card-value">${dev.browser || 'Неизвестно'}</strong></div></div>
+                                <div class="device-card"><div class="device-card-icon"><i data-feather="wifi"></i></div><div class="device-card-content"><span class="device-card-label">IP Адрес</span><strong class="device-card-value">${dev.ip || 'Нет данных'}</strong></div></div>
+                                <div class="device-card"><div class="device-card-icon"><i data-feather="hash"></i></div><div class="device-card-content"><span class="device-card-label">ID Устройства</span><strong class="device-card-value">${devId}</strong></div></div>
+                            </div>
+
+                            <button class="btn-primary btn-remove-device" data-id="${devId}" style="background-color: ${isCurrentBrowser ? 'var(--red)' : 'transparent'}; border: ${isCurrentBrowser ? 'none' : '1px solid var(--border-color)'}; color: ${isCurrentBrowser ? 'white' : 'var(--text-dark)'}; width: 100%; margin-top:20px;">
+                                <i data-feather="${isCurrentBrowser ? 'log-out' : 'trash-2'}" class="icon-small"></i> ${isCurrentBrowser ? 'Завершить текущий сеанс и выйти' : 'Удалить это старое устройство'}
+                            </button>
+                        `;
+                        container.appendChild(card);
+                    });
+                    
+                    feather.replace();
+
+                    // Вешаем события на кнопки
+                    document.querySelectorAll('.btn-remove-device').forEach(btn => {
+                        btn.onclick = (e) => {
+                            const targetId = e.currentTarget.getAttribute('data-id');
+                            const isCurrent = (targetId === currentBrowserId);
+                            const confirmMessage = isCurrent 
+                                ? 'Вы уверены, что хотите отвязать текущее устройство? Это приведет к выходу из системы.' 
+                                : 'Вы уверены, что хотите удалить этот старый сеанс?';
+
+                            if (confirm(confirmMessage)) {
+                                db.ref(`/users/${uid}/devices/${targetId}`).remove().then(() => {
+                                    if (targetId === activeId) db.ref(`/users/${uid}/activeDevice`).remove();
+                                    
+                                    if (isCurrent) {
+                                        auth.signOut().then(() => { window.location.href = "login.html"; });
+                                    } else {
+                                        showToast("Устройство успешно удалено", "success");
+                                    }
+                                });
+                            }
+                        };
+                    });
+                });
+            });
+        }
+              // ================================================
         // ====  ИНИЦИАЛИЗАЦИЯ ПАНЕЛИ ОПЕРАТОРА (V32)  ====
         // ================================================
         
@@ -880,6 +1200,8 @@
             updateProfilePageFields();
             profileDataForm.querySelector('button').disabled = false;
             profilePasswordForm.querySelector('button').disabled = false;
+
+renderDevicesList(currentUser.uid);
 
             navigateToPage("templates-page");
             window.listenersInitialized = true;
@@ -1024,12 +1346,9 @@
         
         function closeTemplateModal() { document.getElementById("template-modal").style.display = "none"; }
 
-        // V32: ИСПРАВЛЕНИЕ ОШИБКИ (Повторная отправка)
         function handleOperatorFormSubmit(e) {
             e.preventDefault();
             if (currentUser.approved !== true) { 
-                // V32-Fix: Разрешаем редактировать, даже если не одобрен (для исправления)
-                // Но проверяем, есть ли ID. Если ID нет (новая), то запрещаем.
                 const templateId = document.getElementById("op-template-id").value;
                 if (!templateId) {
                     showToast("Только одобренные операторы могут добавлять новые шаблоны.", "error"); 
@@ -1054,22 +1373,18 @@
             let msg;
 
             if (templateId) {
-                // --- РЕДАКТИРОВАНИЕ ---
                 const currentStatus = (allTemplates[templateId] && allTemplates[templateId].status) ? allTemplates[templateId].status : 'approved';
                 
-                // V32-Fix: Если шаблон был отклонен, он АВТОМАТИЧЕСКИ уходит на модерацию
                 if (currentStatus === 'rejected') {
                     templateData.status = "pending";
-                    templateData.rejectionReason = null; // Очищаем причину
+                    templateData.rejectionReason = null; 
                     msg = "Шаблон отправлен на повторную модерацию";
                 } else {
-                    templateData.status = currentStatus; // Сохраняем статус
+                    templateData.status = currentStatus; 
                     msg = "Шаблон обновлен";
                 }
                 action = db.ref('templates/' + templateId).update(templateData);
             } else {
-                // --- ДОБАВЛЕНИЕ НОВОГО ---
-                // V32-Fix: Дополнительная проверка, т.к. мы пустили неодобренных
                 if (currentUser.approved !== true) {
                      showToast("Только одобренные операторы могут добавлять новые шаблоны.", "error"); 
                      return;
@@ -1169,27 +1484,18 @@
             if(authorsFilterBtn) authorsFilterBtn.disabled = false;
         }
         
-        // ================================================
-        // ====      ЛОГИКА РЕНДЕРА (V32)             ====
-        // ================================================
-
-        // V32: ИСПРАВЛЕНИЕ ОШИБКИ (Не все шаблоны видны)
         function listenForTemplates() {
             db.ref('templates').on('value', snapshot => {
                 const allData = snapshot.val() || {};
-                allTemplates = {}; // Начинаем с чистого списка
+                allTemplates = {}; 
                 allAvailableTags.clear();
 
                 for (const id in allData) {
                     const t = allData[id];
-                    // V32-Fix: Старые шаблоны без статуса считаем одобренными
                     const status = t.status || 'approved'; 
 
-                    // V32-Fix: Показываем шаблон, ЕСЛИ:
-                    // 1. Это НАШ шаблон (любой статус - 'pending', 'rejected', 'approved')
-                    // 2. Это ЧУЖОЙ, но ОДОБРЕННЫЙ шаблон
                     if ((currentUser && t.authorId === currentUser.uid) || status === 'approved') {
-                        allTemplates[id] = t; // Добавляем в список
+                        allTemplates[id] = t; 
                         if (t.tags) {
                             t.tags.forEach(tag => allAvailableTags.add(tag));
                         }
@@ -1253,7 +1559,6 @@
             checkCardOverflow(cardElement); 
         }
 
-        // V32: ИСПРАВЛЕНИЕ ОШИБКИ (Показ статуса и причины)
         function renderTemplates(targetListElement, filterMode) {
             if (!currentUser || !allUsers) return; 
             
@@ -1319,11 +1624,9 @@
                 const authorName = author ? author.name : (template.authorEmail || "Неизвестно");
                 const isFavorite = template.favorites && template.favorites[currentUser.uid];
                 
-                // V32-Fix: Проверяем права на кнопки
                 const canEdit = (template.authorId === currentUser.uid || userPermissions.canEditAll === true) && (currentUser.approved === true);
                 const canDelete = (template.authorId === currentUser.uid || userPermissions.canDeleteAll === true) && (currentUser.approved === true);
                 
-                // V32-Fix: Особое право на редактирование (если свой, но отклонен)
                 const canEditRejected = (template.authorId === currentUser.uid && (template.status === 'rejected' || template.status === 'pending'));
 
                 const editButtonHtml = (canEdit || canEditRejected) ? `<button class="card-action-btn" data-action="edit" title="Редактировать"><i data-feather="edit-2" class="icon-small"></i></button>` : '';
@@ -1333,7 +1636,6 @@
                 const activeLang = currentGlobalLang;
                 const inactiveLang = (currentGlobalLang === 'tj') ? 'ru' : 'tj';
 
-                // V32-Fix: Показываем статус и причину
                 const status = template.status || "approved"; 
                 let statusBadgeHtml = "";
                 let rejectionNoticeHtml = "";

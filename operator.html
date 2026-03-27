@@ -827,9 +827,9 @@
         let currentGlobalLang = 'tj';
       
    // ==========================================
-        // 1. АНАЛИЗАТОР УСТРОЙСТВА (ПРОДВИНУТЫЙ ТРЕКЕР)
+        // 1. АНАЛИЗАТОР УСТРОЙСТВА (ПРОДВИНУТЫЙ ТРЕКЕР С CLIENT HINTS)
         // ==========================================
-        function getExtendedDeviceInfo() {
+        async function getExtendedDeviceInfo() {
             const ua = navigator.userAgent;
             let browser = "Неизвестно"; 
             let os = "Неизвестно"; 
@@ -840,41 +840,45 @@
             else if (ua.includes("OPR/") || ua.includes("Opera/")) browser = "Opera";
             else if (ua.includes("Edg/")) browser = "Microsoft Edge";
             else if (ua.includes("Firefox/")) browser = "Mozilla Firefox";
-            else if (ua.includes("SamsungBrowser/")) browser = "Samsung Internet"; // Добавлено для браузера Samsung
+            else if (ua.includes("SamsungBrowser/")) browser = "Samsung Internet";
             else if (ua.includes("Chrome/") || ua.includes("CriOS/")) browser = "Google Chrome";
             else if (ua.includes("Safari/") && !ua.includes("Chrome")) browser = "Apple Safari";
 
-            // --- 2. Умное определение Android (даже в режиме ПК) ---
             let isAndroid = /Android/i.test(ua);
-            
-            // Если устройство скрывает, что оно Android (например, включена "Версия для ПК")
-            if (!isAndroid && /Linux/i.test(ua)) {
-                // Проверяем скрытые данные платформы и архитектуру процессора (ARM)
-                if ((navigator.userAgentData && navigator.userAgentData.platform === "Android") || 
-                    (navigator.platform && /arm|aarch/i.test(navigator.platform))) {
-                    isAndroid = true;
-                }
-            }
 
-            // --- 3. Определение ОС и Модели ---
+            // --- 2. Распознавание ОС и Модели ---
             if (isAndroid) {
                 os = "Android";
-                model = "Android Смартфон";
-                
-                // Пытаемся вытащить версию ОС
-                const androidMatch = ua.match(/Android\s([0-9\.]+)/i);
-                if (androidMatch) {
-                    os = `Android ${androidMatch[1]}`;
-                } else if (navigator.userAgentData && navigator.userAgentData.platform === "Android") {
-                    os = "Android (Режим ПК)";
+                model = "Смартфон";
+
+                // ВЫТАСКИВАЕМ РЕАЛЬНЫЕ ДАННЫЕ ЧЕРЕЗ CLIENT HINTS API (Обойдет "Android 10")
+                if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+                    try {
+                        const hints = await navigator.userAgentData.getHighEntropyValues(['platformVersion', 'model']);
+                        
+                        if (hints.model) {
+                            model = hints.model; // Выдаст реальную модель (напр. SM-G996B)
+                        }
+                        if (hints.platformVersion) {
+                            // Преобразуем версию (например, "15.0.0" -> "15")
+                            const majorVersion = hints.platformVersion.split('.')[0];
+                            os = `Android ${majorVersion}`;
+                        }
+                    } catch (e) {
+                        console.error("Client Hints Error:", e);
+                    }
                 }
 
-                // Пытаемся вытащить точную модель (например, SM-G996B)
-                const modelMatch = ua.match(/Android.*?; (.*?)(?:\sBuild\/|\))/i);
-                if (modelMatch && modelMatch[1] && modelMatch[1].length > 1 && modelMatch[1] !== "wv" && modelMatch[1] !== "K" && modelMatch[1] !== "X11") {
-                    model = modelMatch[1].replace(/^[a-z]{2}-[a-z]{2};\s*/i, '').trim();
-                } else if (navigator.userAgentData && navigator.userAgentData.mobile) {
-                    model = "Смартфон";
+                // Если Client Hints не сработал (старый браузер), используем резервный метод
+                if (os === "Android") {
+                    const androidMatch = ua.match(/Android\s([0-9\.]+)/i);
+                    if (androidMatch) os = `Android ${androidMatch[1]}`;
+                }
+                if (model === "Смартфон") {
+                    const modelMatch = ua.match(/Android.*?; (.*?)(?:\sBuild\/|\))/i);
+                    if (modelMatch && modelMatch[1] && !['wv', 'K', 'X11'].includes(modelMatch[1])) {
+                        model = modelMatch[1].replace(/^[a-z]{2}-[a-z]{2};\s*/i, '').trim();
+                    }
                 }
             } 
             else if (/iPhone/i.test(ua)) {
@@ -904,7 +908,7 @@
                 model = "ПК (Linux)";
             }
 
-            // --- 4. Генерация чисто цифрового ID ---
+            // --- 3. Генерация цифрового ID ---
             let id = localStorage.getItem('deviceId');
             if (!id || !/^\d+$/.test(id)) { 
                 id = Date.now().toString() + Math.floor(1000 + Math.random() * 9000).toString();
@@ -917,10 +921,10 @@
 // ==========================================
         // 2. АВТОРИЗАЦИЯ ОПЕРАТОРА И ЗАПИСЬ СЕССИИ
         // ==========================================
-        auth.onAuthStateChanged(user => {
+        auth.onAuthStateChanged(async user => { // <-- Добавлено слово async
             if (user) {
                 // ПИШЕМ УСТРОЙСТВО В БАЗУ ДАННЫХ
-                const devInfo = getExtendedDeviceInfo();
+                const devInfo = await getExtendedDeviceInfo(); // <-- Добавлено слово await
                 const deviceRef = db.ref(`/users/${user.uid}/devices/${devInfo.id}`);
                 
                 deviceRef.update({
@@ -936,14 +940,10 @@
                     .then(d => { deviceRef.update({ ip: d.ip }); })
                     .catch(() => {});
 
-                // ---> САМОЕ ГЛАВНОЕ: СЛУШАТЕЛЬ УДАЛЕНИЯ СЕССИИ <---
-                // Если админ удалит этот ID из базы, сработает этот код:
+                // Слушатель удаления сессии (Килл-свитч)
                 deviceRef.on('value', snapshot => {
                     if (!snapshot.exists()) {
-                        // Сессия удалена! Разлогиниваем оператора.
-                        auth.signOut().then(() => {
-                            window.location.href = "login.html";
-                        });
+                        auth.signOut().then(() => { window.location.href = "login.html"; });
                     }
                 });
 
@@ -952,7 +952,6 @@
                     const userData = snapshot.val();
                     if (!userData) { auth.signOut(); return; }
                     
-                    // Если сюда случайно зашел админ - перекидываем в админку
                     if (userData.role === 'admin' || userData.isAdmin) {
                         window.location.href = "admin.html";
                         return;
@@ -965,6 +964,8 @@
                 window.location.href = "login.html";
             }
         });
+             
+
 
 
         function initOperatorPanel() {

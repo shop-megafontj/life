@@ -112,8 +112,51 @@
         .lang-switcher, .theme-switcher { position: absolute; top: 10px; background-color: var(--header-bg); border-radius: 20px; border: 1px solid var(--primary-color); padding: 4px; display: flex; box-shadow: 0 2px 5px var(--shadow-color); z-index: 20; }
         .lang-switcher { right: 10px; }
         .theme-switcher { left: 10px; }
-        .lang-btn, .theme-btn { background-color: transparent; border: none; padding: 8px 16px; border-radius: 16px; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease, color 0.3s ease; font-size: 12px; }
-        .lang-btn.active, .theme-btn.active { background-color: var(--primary-color); color: white; }
+       /* Основной эффект Liquid Glass */
+.lang-btn, .theme-btn { 
+    background: rgba(255, 255, 255, 0.25); /* Полупрозрачный фон */
+    backdrop-filter: blur(12px); /* Размытие фона под кнопкой */
+    -webkit-backdrop-filter: blur(12px); /* Обязательно для поддержки Safari/iOS */
+    border: 1px solid rgba(255, 255, 255, 0.4); /* Имитация блика на гранях стекла */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Легкая тень для объема */
+    padding: 8px 16px; 
+    border-radius: 16px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    transition: all 0.3s ease; /* Плавный переход для всех свойств */
+    font-size: 12px; 
+    color: var(--text-color);
+}
+
+/* Эффект при наведении (стекло становится чуть светлее) */
+.lang-btn:hover, .theme-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Активная кнопка (Яркий зеленый с неоновым свечением) */
+.lang-btn.active, .theme-btn.active { 
+    background: var(--primary-color); 
+    color: white; 
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 4px 15px rgba(0, 185, 86, 0.4); /* Эффект свечения в цвет кнопки */
+}
+
+/* Адаптация стекла под ТЕМНУЮ ТЕМУ */
+body.dark .lang-btn, body.dark .theme-btn {
+    background: rgba(0, 0, 0, 0.3); /* Темное полупрозрачное стекло */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Очень тусклый блик */
+    color: #eee;
+}
+body.dark .lang-btn:hover, body.dark .theme-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+body.dark .lang-btn.active, body.dark .theme-btn.active {
+    background: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 4px 15px rgba(0, 185, 86, 0.4);
+    color: #fff;
+}
         .navigation { display: flex; justify-content: space-around; background-color: var(--nav-bg); padding: 10px 0; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 5px; }
         .nav-link { text-decoration: none; font-weight: bold; font-size: 14px; padding: 8px 18px; border-radius: 20px; border: #00aa44 1px solid; transition: background-color 0.3s, color 0.3s; cursor: pointer; color: var(--text-color); }
         .nav-link.active { background-color: var(--active-bg); color: var(--active-text); }
@@ -266,48 +309,53 @@
             font-weight: 700; cursor: pointer; font-family: var(--font-family);
         }
 
-        .ai-results { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+        /* === ДИЗАЙН КАРТОЧЕК AI === */
+        .ai-results { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #fafafa; }
+        body.dark .ai-results { background: #1a1a1a; }
         .ai-empty { text-align: center; color: var(--text-color); opacity: 0.6; margin-top: 40px; font-size: 14px; }
         
-        /* AI КАРТОЧКА РЕКОМЕНДАЦИИ */
-        .ai-card { background: var(--light-gray); border-radius: 16px; padding: 16px; border: 1px solid var(--border-color); animation: slideUp 0.3s ease-out; }
+        .ai-card { background: #f4f9f6; border-radius: 20px; padding: 20px; border: none; animation: slideUp 0.3s ease-out; color: var(--text-color); }
+        body.dark .ai-card { background: #232b26; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        .ai-tag { display: inline-block; font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 6px; margin-bottom: 12px; text-transform: uppercase; }
-        .tag-price { background: rgba(0, 170, 68, 0.15); color: var(--primary-color); }
-        .tag-net { background: rgba(0, 102, 255, 0.15); color: #0066ff; }
-        .tag-bal { background: rgba(136, 0, 255, 0.15); color: #8800ff; }
+        .ai-tag { display: inline-block; font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 12px; margin-bottom: 12px; text-transform: uppercase; color: #fff; }
+        .tag-blue { background: #2d98da; }
+        .tag-green { background: #00B956; }
+        .tag-purple { background: #7A00B9; }
         
-        .ai-card-title { font-size: 16px; font-weight: 800; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
-        .ai-card-price { color: var(--primary-color); font-size: 20px; font-weight: 800; text-align: right; line-height: 1; }
-        .ai-card-price small { font-size: 12px; opacity: 0.7; font-weight: 500; }
+        .ai-card-main-title { font-size: 22px; font-weight: 800; margin-bottom: 15px; color: var(--text-color); }
         
-        .ai-stats { display: flex; gap: 8px; margin: 16px 0; }
-        .ai-stat-box { flex: 1; background: var(--container-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px; text-align: center; }
-        .ai-stat-val { font-weight: 800; font-size: 14px; color: var(--text-color); }
-        .ai-stat-lbl { font-size: 10px; opacity: 0.6; text-transform: uppercase; margin-top: 2px; }
+        .ai-feature-list { list-style: none; padding: 0; margin: 0 0 20px 0; }
+        .ai-feature-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 14px; font-weight: 600; color: #555; }
+        body.dark .ai-feature-item { color: #ccc; }
+        .ai-feature-icon { width: 22px; height: 22px; color: #7A00B9; flex-shrink: 0; }
         
-        .ai-actions { display: flex; gap: 8px; }
-        .ai-btn-apply { flex: 1; background: var(--primary-color); color: #fff; border: none; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .ai-btn-copy { flex: 1; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .ai-bonus-badge { color: var(--brand-purple); font-weight: 800; display: inline-flex; align-items: center; gap: 4px; margin-left: 5px; }
+        
+        .ai-unlim-row { display: flex; align-items: center; gap: 10px; margin-top: 15px; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 12px; }
+        body.dark .ai-unlim-row { background: rgba(255,255,255,0.05); }
+        .ai-unlim-icons { display: flex; flex-shrink: 0; }
+        .ai-unlim-icons img { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #f4f9f6; margin-left: -10px; object-fit: cover; }
+        body.dark .ai-unlim-icons img { border-color: #232b26; }
+        .ai-unlim-icons img:first-child { margin-left: 0; }
+        .ai-unlim-text { font-size: 11px; line-height: 1.3; font-weight: 500; color: #666; }
+        body.dark .ai-unlim-text { color: #aaa; }
+        
+        .ai-price-block { font-size: 32px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: baseline; gap: 6px; color: var(--text-color); }
+        .ai-price-block small { font-size: 14px; font-weight: 600; color: #888; text-transform: uppercase; }
+        
+        .ai-actions { display: flex; gap: 10px; }
+        .ai-btn-apply { flex: 1; background: #00B956; color: #fff; border: none; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0, 185, 86, 0.2); }
+        .ai-btn-apply:active { transform: scale(0.96); }
+        .ai-btn-copy { flex: 1; background: transparent; border: 2px solid #00B956; color: #00B956; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.2s; }
+        .ai-btn-copy:active { transform: scale(0.96); background: rgba(0, 185, 86, 0.1); }
 
-        #device-conflict-modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.85); display: none;
-    justify-content: center; align-items: center; z-index: 10000;
-}
-.conflict-box {
-    background: var(--container-bg, #fff); padding: 30px; border-radius: 16px;
-    text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-.conflict-box h2 { color: #e74c3c; margin-top: 0; }
-.conflict-box p { color: var(--text-color, #333); margin-bottom: 20px; line-height: 1.5; font-weight: 600;}
-.conflict-btn {
-    background: var(--primary-color, #00B956); color: white; border: none;
-    padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer;
-    width: 100%; margin-bottom: 10px; font-size: 14px;
-}
-.conflict-btn-logout { background: #e74c3c; }
+        #device-conflict-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 10000; }
+        .conflict-box { background: var(--container-bg, #fff); padding: 30px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .conflict-box h2 { color: #e74c3c; margin-top: 0; }
+        .conflict-box p { color: var(--text-color, #333); margin-bottom: 20px; line-height: 1.5; font-weight: 600;}
+        .conflict-btn { background: var(--primary-color, #00B956); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; font-size: 14px; }
+        .conflict-btn-logout { background: #e74c3c; }
     </style>
 </head>
 
@@ -332,8 +380,8 @@
         <div class="header">
             <img src="" alt="Тариф">
             <div class="lang-switcher">
-                <button class="lang-btn" data-lang="tj">🇹🇯Тоҷикӣ</button>
-                <button class="lang-btn" data-lang="ru">🇷🇺Русский</button>
+                <button class="lang-btn" data-lang="tj">Тоҷикӣ</button>
+                <button class="lang-btn" data-lang="ru">Русский</button>
             </div>
             <div class="theme-switcher">
                 <button class="theme-btn" data-theme="light">☀️</button>
@@ -403,10 +451,10 @@
         <div class="ai-search-box">
             <label>Желаемый бюджет (сомони):</label>
             <div class="ai-input-group">
-                <input type="number" id="ai-budget" placeholder="Например: 80">
+                <input type="number" id="ai-budget" placeholder="Например: 100">
                 <button id="ai-search-btn">Искать</button>
             </div>
-            <p style="font-size: 11px; opacity: 0.6; margin-top: 8px;">Ищем тарифы в диапазоне ±5 сомони</p>
+            <p style="font-size: 11px; opacity: 0.6; margin-top: 8px;">Ищем лучшие тарифы (диапазон ±5 сомони)</p>
             
             <!-- AI Навигация Вкладок -->
             <div class="ai-tabs" id="ai-filter-tabs">
@@ -556,18 +604,13 @@ let appInitialized = false;
                 }
 
                 try {
-                    // 1. Получаем полные данные о текущем устройстве
                     const devInfo = await getExtendedDeviceInfo();
-                    
-                    // 2. Слушаем, какое устройство сейчас считается "Активным" в базе
                     database.ref('/users/' + user.uid + '/activeDevice').on('value', async snap => {
                         const activeDeviceId = snap.val();
 
-                        // СИТУАЦИЯ А: Активного устройства нет, либо это наше текущее устройство -> ПУСКАЕМ
                         if (!activeDeviceId || activeDeviceId === devInfo.id) {
                             document.getElementById('device-conflict-modal').style.display = 'none';
 
-                            // Записываем данные в базу
                             const deviceRef = database.ref(`/users/${user.uid}/devices/${devInfo.id}`);
                             let ipAddress = '-';
                             try {
@@ -590,24 +633,18 @@ let appInitialized = false;
 
                             if (!appInitialized) {
                                 appInitialized = true;
-                                fetchDataAndInitialize(user); // Запускаем приложение
+                                fetchDataAndInitialize(user);
                             }
                         } 
-                        // СИТУАЦИЯ Б: В базе записано ДРУГОЕ устройство -> БЛОКИРУЕМ И ПОКАЗЫВАЕМ ОКНО
                         else {
                             document.getElementById('device-conflict-modal').style.display = 'flex';
-                            
-                            // Логика кнопки "Удалить другое устройство и войти"
                             document.getElementById('btn-force-login').onclick = async () => {
-                                // Удаляем старое устройство из базы
                                 await database.ref(`/users/${user.uid}/devices/${activeDeviceId}`).remove();
-                                // Делаем наше устройство главным (это перезапустит проверку и пустит нас)
                                 await database.ref(`/users/${user.uid}/activeDevice`).set(devInfo.id);
                             };
                         }
                     });
 
-                    // 3. Килл-свитч: Если админ выкинет НАС (удалит наше устройство из базы)
                     database.ref(`/users/${user.uid}/devices/${devInfo.id}`).on('value', snapshot => {
                         if (appInitialized && !snapshot.exists()) {
                             auth.signOut().then(() => { window.location.href = "login.html"; });
@@ -622,6 +659,7 @@ let appInitialized = false;
                 window.location.href = 'login.html?redirect=index.html';
             }
         });
+        
         // --- 4. FETCH DATA & INITIALIZE APP ---
         function fetchDataAndInitialize(user) {
             database.ref('/users/' + user.uid).once('value').then(roleSnapshot => {
@@ -650,7 +688,6 @@ let appInitialized = false;
                         
                         initializeAppLogic(user);
 
-                        // Убираем скелетон ПОСЛЕ успешной инициализации
                         document.getElementById('loading-skeleton').style.display = 'none';
                         document.querySelector('.container').style.display = 'block';
 
@@ -730,7 +767,7 @@ let appInitialized = false;
             }
 
             function initializeTariff(config) {
-                if(!config.minutes || !config.minutes.values) return; // Защита от пустых данных
+                if(!config.minutes || !config.minutes.values) return; 
                 config.state.selectedMinutes = config.state.selectedMinutes || config.minutes.values[0];
                 config.state.selectedSms = config.state.selectedSms || config.sms.values[0];
                 config.state.selectedInternet = config.state.selectedInternet || config.internet.values[0];
@@ -801,7 +838,7 @@ let appInitialized = false;
                 const bonusContainer = document.getElementById(bonusContainerId);
                 const bonusTextElem = document.getElementById(bonusTextId);
 
-                if (total > 100) {
+                if (total >= 100) {
                     const template = translations[currentLang]?.bonus_text_template || '';
                     bonusTextElem.innerText = template.replace('{gb}', config.state.selectedInternet);
                     bonusContainer.style.display = 'block';
@@ -916,7 +953,6 @@ let appInitialized = false;
 
             // --- AI LOGIC & FUNCTIONS ---
 
-            // Generate combos from specific config dynamically (ИСПРАВЛЕННЫЙ АЛГОРИТМ)
             function generateTariffCombosForConfig(cfg, typeName, typeId) {
                 let allTariffs = [];
                 if (!cfg || !cfg.minutes) return allTariffs;
@@ -927,8 +963,6 @@ let appInitialized = false;
                             let rawCost = cfg.basePrice + getOptionCost(cfg.minutes, min) + getOptionCost(cfg.sms, sms) + getOptionCost(cfg.internet, int);
                             let finalPrice = rawCost > cfg.maxTotal ? cfg.maxTotal : rawCost;
                             
-                            // Сохраняем rawCost, чтобы потом отбросить невыгодные тарифы
-                            // (те, где мы платим maxTotal, но получаем меньше, чем могли бы)
                             allTariffs.push({ 
                                 min, sms, int, 
                                 price: parseFloat(finalPrice.toFixed(2)), 
@@ -985,15 +1019,11 @@ let appInitialized = false;
                     else if (currentAIFilter === 'life1') allT = [...c1];
                     else if (currentAIFilter === 'life2') allT = [...c2];
 
-                    // Ищем в диапазоне +-5 сомони
+                    // Ищем строго в диапазоне ±5 сомони (как вы просили)
                     let candidates = allT.filter(t => t.price >= target - 5 && t.price <= target + 5);
 
-                    // УМНАЯ ФИЛЬТРАЦИЯ: Если цена тарифа уперлась в maxTotal,
-                    // мы должны оставить только те комбинации, которые дают максимум за эти деньги.
                     candidates = candidates.filter(t => {
                         if (t.price === (t.typeId === 'life1' ? config1.maxTotal : config2.maxTotal)) {
-                            // Если реальная стоимость без скидки меньше максимальной цены, значит этот конфиг невыгодный
-                            // Оставляем только те, где "сырая" стоимость превышает или равна лимиту
                             return t.rawCost >= t.price;
                         }
                         return true;
@@ -1004,7 +1034,6 @@ let appInitialized = false;
                         return;
                     }
 
-                    // Уникальные комбинации
                     const uniqueCandidates = [];
                     const seen = new Set();
                     for (const c of candidates) {
@@ -1015,81 +1044,123 @@ let appInitialized = false;
                         }
                     }
 
-                    // Сортируем: сначала самые близкие по цене, затем больше интернета, затем больше минут
-                    uniqueCandidates.sort((a,b) => {
-                        let diffA = Math.abs(a.price - target);
-                        let diffB = Math.abs(b.price - target);
-                        if (diffA !== diffB) return diffA - diffB;
-                        if (b.int !== a.int) return b.int - a.int;
-                        return b.min - a.min;
-                    });
+                    // --- УМНАЯ РАЗБИВКА НА 4 КАТЕГОРИИ ---
+                    let selectedCards = [];
+                    let pool = [...uniqueCandidates];
 
-                    const minPriceDiff = Math.min(...uniqueCandidates.map(c => Math.abs(c.price - target)));
-                    const maxInt = Math.max(...uniqueCandidates.map(c => c.int));
-                    const maxMin = Math.max(...uniqueCandidates.map(c => c.min));
-                    const maxSms = Math.max(...uniqueCandidates.map(c => c.sms));
+                    // Функция для извлечения тарифа и удаления его из пула (чтобы не дублировать)
+                    function extractBest(sortFn, limitFunc = null) {
+                        if (limitFunc) pool = pool.filter(limitFunc);
+                        pool.sort(sortFn);
+                        let best = pool.shift();
+                        return best;
+                    }
+
+                    // 1. Для интернета (Максимум ГБ, при равных ГБ — дешевле)
+                    let tInternet = extractBest((a,b) => b.int - a.int || a.price - b.price);
+                    if (tInternet) {
+                        tInternet.badgeTitle = "ИНТЕРНЕТ";
+                        tInternet.badgeCls = "tag-purple";
+                        tInternet.cardMainTitle = "Для интернета";
+                        selectedCards.push(tInternet);
+                    }
+
+                    // 2. Лучше по цене (Максимально близко к бюджету, при равной цене — больше пользы)
+                    let tPrice = extractBest((a,b) => Math.abs(a.price - target) - Math.abs(b.price - target) || (b.int*2 + b.min) - (a.int*2 + a.min));
+                    if (tPrice) {
+                        tPrice.badgeTitle = "ВЫГОДНО";
+                        tPrice.badgeCls = "tag-blue";
+                        tPrice.cardMainTitle = "Лучше по цене";
+                        selectedCards.push(tPrice);
+                    }
+
+                    // 3. Для разговоров (Максимум минут)
+                    let tTalk = extractBest((a,b) => b.min - a.min || a.price - b.price);
+                    if (tTalk) {
+                        tTalk.badgeTitle = "ОБЩЕНИЕ";
+                        tTalk.badgeCls = "tag-green";
+                        tTalk.cardMainTitle = "Для разговора";
+                        selectedCards.push(tTalk);
+                    }
+
+                    // 4. Идеальный (Баланс минут, ГБ и СМС)
+                    let tIdeal = extractBest((a,b) => {
+                        let scoreA = (a.min >= 50 ? 1 : 0) + (a.sms > 0 ? 1 : 0) + (a.int >= 20 ? 1 : 0);
+                        let scoreB = (b.min >= 50 ? 1 : 0) + (b.sms > 0 ? 1 : 0) + (b.int >= 20 ? 1 : 0);
+                        if (scoreA !== scoreB) return scoreB - scoreA;
+                        return Math.abs(a.price - target) - Math.abs(b.price - target);
+                    });
+                    if (tIdeal) {
+                        tIdeal.badgeTitle = "ОПТИМАЛЬНО";
+                        tIdeal.badgeCls = "tag-blue";
+                        tIdeal.cardMainTitle = "Идеальный";
+                        selectedCards.push(tIdeal);
+                    }
 
                     let renderedCards = '';
-                    let usedTags = new Set();
+                    const minIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`;
+                    const netIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path><path d="M2 12h20"></path></svg>`;
+                    const smsIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
 
-                    const renderCard = (t, title, badgeCls) => {
+                    selectedCards.forEach(t => { 
+                        // Формируем вывод ГБ (с бонусом)
+                        let gbDisplay = `${t.int} ГБ`;
+                        if (t.price >= 100 && t.int > 0) {
+                            gbDisplay = `${t.int} ГБ <span class="ai-bonus-badge">🎁 +${t.int} ГБ</span>`;
+                        }
+
+                        let unlimIcons = `
+                            <img src="https://shop-megafontj.github.io/tariff/call.png">
+                            <img src="https://shop-megafontj.github.io/tariff/internet.png">
+                        `;
+                        let unlimText = "Безлимит внутри сети, ночной безлимит";
+                        
+                        if (t.typeId === 'life2') {
+                            unlimIcons += `
+                                <img src="https://shop-megafontj.github.io/tariff/iviicon.png">
+                                <img src="https://shop-megafontj.github.io/tariff/oilatvicon.png">
+                            `;
+                            unlimText += ", IVI и Оила ТВ";
+                        }
+
                         const strObj = encodeURIComponent(JSON.stringify(t));
-                        return `
+
+                        renderedCards += `
                         <div class="ai-card">
-                            <div class="ai-tag ${badgeCls}">${title}</div>
-                            <div class="ai-card-title">
-                                <span>${t.typeName}</span>
-                                <div class="ai-card-price">${t.price} <small>сом</small></div>
+                            <div class="ai-tag ${t.badgeCls}">${t.badgeTitle}</div>
+                            <div class="ai-card-main-title">${t.cardMainTitle} <span style="font-size:12px; color:#999; font-weight:600;">(${t.typeName})</span></div>
+                            
+                            <ul class="ai-feature-list">
+                                <li class="ai-feature-item">
+                                    <div class="ai-feature-icon">${minIcon}</div> 
+                                    ${t.min} минут на все сети
+                                </li>
+                                <li class="ai-feature-item">
+                                    <div class="ai-feature-icon">${netIcon}</div> 
+                                    ${gbDisplay}
+                                </li>
+                                <li class="ai-feature-item">
+                                    <div class="ai-feature-icon">${smsIcon}</div> 
+                                    ${t.sms} смс
+                                </li>
+                            </ul>
+
+                            <div class="ai-unlim-row">
+                                <div class="ai-unlim-icons">
+                                    ${unlimIcons}
+                                </div>
+                                <div class="ai-unlim-text">${unlimText}</div>
                             </div>
-                            <div class="ai-stats">
-                                <div class="ai-stat-box"><div class="ai-stat-val">${t.int}</div><div class="ai-stat-lbl">ГБ</div></div>
-                                <div class="ai-stat-box"><div class="ai-stat-val">${t.min}</div><div class="ai-stat-lbl">Мин</div></div>
-                                <div class="ai-stat-box"><div class="ai-stat-val">${t.sms}</div><div class="ai-stat-lbl">SMS</div></div>
+
+                            <div class="ai-price-block">
+                                ${t.price.toFixed(2)} <small>TJS/мес</small>
                             </div>
+
                             <div class="ai-actions">
                                 <button class="ai-btn-apply" onclick="applyAITariff('${strObj}')">Выбрать</button>
                                 <button class="ai-btn-copy" onclick="copyAITariff('${strObj}')">Скопировать</button>
                             </div>
                         </div>`;
-                    };
-
-                    uniqueCandidates.slice(0, 15).forEach(t => { 
-                        let badgeTitle = "Отличный выбор 👍";
-                        let badgeCls = "tag-price";
-                        let diff = Math.abs(t.price - target);
-
-                        if (diff === minPriceDiff && !usedTags.has('best_price')) {
-                            badgeTitle = diff === 0 ? "Точно в бюджет 🎯" : "Лучший по цене 🌟";
-                            badgeCls = "tag-price";
-                            usedTags.add('best_price');
-                        } else if (t.int === maxInt && !usedTags.has('max_net')) {
-                            badgeTitle = "Максимум интернета 🌐";
-                            badgeCls = "tag-net";
-                            usedTags.add('max_net');
-                        } else if (t.min === maxMin && t.min > 0 && !usedTags.has('max_min')) {
-                            badgeTitle = "Максимум минут 📞";
-                            badgeCls = "tag-bal";
-                            usedTags.add('max_min');
-                        } else if (t.sms === maxSms && t.sms > 0 && !usedTags.has('max_sms')) {
-                            badgeTitle = "Макс SMS ✉️";
-                            badgeCls = "tag-net";
-                            usedTags.add('max_sms');
-                        } else if (t.int >= 20 && t.min >= 100 && !usedTags.has('ideal')) {
-                            badgeTitle = "Идеальный баланс ⚖️";
-                            badgeCls = "tag-bal";
-                            usedTags.add('ideal');
-                        } else if (t.int > 10) {
-                            badgeTitle = "Для интернета 🚀";
-                            badgeCls = "tag-net";
-                        } else if (t.min > 100) {
-                            badgeTitle = "Для долгих разговоров 🎙️";
-                            badgeCls = "tag-bal";
-                        } else {
-                            badgeTitle = "Альтернатива ✨";
-                            badgeCls = "tag-price";
-                        }
-
-                        renderedCards += renderCard(t, badgeTitle, badgeCls);
                     });
 
                     resDiv.innerHTML = renderedCards;
@@ -1118,9 +1189,14 @@ let appInitialized = false;
                 let nightTxt = currentLang === 'tj' ? " ва интернети шабона дорад, ки аз 00:00 то 6:59 интернети бемаҳдудро пешниҳод мекунад." : " и включает безлимитный ночной интернет с 00:00 до 6:59.";
                 let tariffName = t.typeId === 'life1' ? "Биё! бисоз Life" : "Биё! бисоз Life 2.0";
 
+                let bonusTxt = "";
+                if (t.price >= 100 && t.int > 0) {
+                    bonusTxt = ` 🎁 +${t.int} ГБ`; // Добавляем бонусный текст прямо к скопированному тексту
+                }
+
                 let textToCopy = currentLang === 'tj' 
-                    ? `Тарофаи "${tariffName}" бо нархи ${t.price} сомонӣ💸, дар худ ${t.min} дақиқа ба дигар шабакаҳои ҶТ📞, ${t.int} ГБ🌐, ${t.sms} СМС✉️${nightTxt}`
-                    : `Тариф "${tariffName}" за ${t.price} сомони💸, включает ${t.min} минут по РТ📞, ${t.int} ГБ🌐, ${t.sms} СМС✉️${nightTxt}`;
+                    ? `Тарофаи "${tariffName}" бо нархи ${t.price} сомонӣ💸, дар худ ${t.min} дақиқа ба дигар шабакаҳои ҶТ📞, ${t.int} ГБ🌐${bonusTxt}, ${t.sms} СМС✉️${nightTxt}`
+                    : `Тариф "${tariffName}" за ${t.price} сомони💸, включает ${t.min} минут по РТ📞, ${t.int} ГБ🌐${bonusTxt}, ${t.sms} СМС✉️${nightTxt}`;
                 
                 navigator.clipboard.writeText(textToCopy).then(() => showToast("copied_toast"));
             };
@@ -1244,18 +1320,12 @@ let appInitialized = false;
         }
     });
 
-    // 6. SERVICE WORKER CACHE CLEAR (УДАЛЕНИЕ СЛОМАННОГО КЭША)
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
             for(let registration of registrations) {
-                // Принудительно отключаем SW, чтобы он перестал блокировать Firebase LP
                 registration.unregister();
             }
         });
-        // Новую регистрацию лучше добавить только тогда, когда ты поправишь сам sw.js
-        // window.addEventListener('load', () => {
-        //     navigator.serviceWorker.register('/sw.js');
-        // });
     }
     </script>
 </body>

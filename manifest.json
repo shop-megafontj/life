@@ -9,18 +9,18 @@
   "description": "Создайте свой идеальный тариф Life.",
   "icons": [
     {
-      "src": "file_00000000a5287243bc6bc8ad0a12dd58.png",
+      "src": "logoapp.jpg",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/png"
+      "type": "image/jpg"
     },
     {
-      "src": "file_00000000a5287243bc6bc8ad0a12dd58.png",
-      "type": "image/png",
+      "src": "logoapp.jpg",
+      "type": "image/jpg",
       "sizes": "192x192"
     },
     {
-      "src": "file_00000000a5287243bc6bc8ad0a12dd58.png",
-      "type": "image/png",
+      "src": "logoapp.jpg",
+      "type": "image/jpg",
       "sizes": "512x512"
     }
   ]

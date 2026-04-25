@@ -22,7 +22,7 @@
             --modal-bg: #fff;
             --toast-bg: var(--primary-color);
             --toast-text: #fff;
-            --nav-bg: #fff;
+            --nav-bg: transparent; 
             --option-bg: #fff;
             --option-border: var(--border-color);
             --option-text: var(--primary-color);
@@ -47,8 +47,7 @@
 
         body.dark {
             --light-gray: #2c2c2c;
-            --border-color: #444;
-            --text-color: #eee;
+            --border-color: #444;            --text-color: #eee;
             --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             --button-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
             --background-color: #121212;
@@ -56,7 +55,7 @@
             --modal-bg: #2a2a2a;
             --toast-bg: #333;
             --toast-text: #eee;
-            --nav-bg: #1e1e1e;
+            --nav-bg: transparent; 
             --option-bg: #2c2c2c;
             --option-border: #444;
             --option-text: #00cc55;
@@ -80,16 +79,27 @@
         }
         
         @keyframes shimmer { 100% { transform: translateX(100%); } }
-        .skeleton-wrapper { max-width: 1200px; margin: 0 auto; background-color: var(--container-bg); }
+        
+        /* === ИСПРАВЛЕНИЕ СКЕЛЕТОНА === */
+        .skeleton-wrapper { 
+            position: fixed; 
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--background-color); 
+            z-index: 9999; 
+            display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto;
+        }
+        
         .sk-item { position: relative; overflow: hidden; background-color: var(--skeleton-bg); border-radius: 12px; }
         .sk-item::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: translateX(-100%); background: linear-gradient(90deg, transparent, var(--skeleton-shimmer), transparent); animation: shimmer 1.5s infinite linear; }
-        .sk-header { width: 100%; height: 150px; border-radius: 0; position: relative; margin-bottom: 0; }
+        
+        .sk-header { width: 100%; height: 150px; border-radius: 0; position: relative; margin-bottom: 20px; }
         .sk-header-buttons { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; }
-        .sk-button-group { display: flex; gap: 8px; padding: 6px; border-radius: 24px; background-color: var(--header-bg); }
+        .sk-button-group { display: flex; gap: 8px; padding: 6px; border-radius: 24px; background-color: var(--skeleton-bg); }
         .sk-button-sm { width: 42px; height: 32px; border-radius: 18px; }
-        .sk-nav { display: flex; justify-content: space-around; padding: 16px; gap: 16px; border-bottom: 1px solid var(--border-color); background-color: var(--nav-bg); }
+                .sk-nav { display: flex; justify-content: space-around; padding: 16px; gap: 16px; border-bottom: 1px solid var(--border-color); background-color: var(--container-bg); border-radius: 16px; margin-bottom: 20px; }
         .sk-nav-btn { flex-grow: 1; height: 40px; border-radius: 24px; }
-        .sk-content { padding: 24px; }
+        
+        .sk-content { padding: 0; }
         .sk-line { height: 22px; margin-bottom: 12px; border-radius: 12px; }
         .sk-line-short { width: 45%; }
         .sk-line-medium { width: 70%; }
@@ -97,7 +107,7 @@
         .sk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 14px; margin-top: 18px; }
         .sk-grid-item { height: 52px; border-radius: 14px; }
         .sk-price { width: 55%; height: 32px; margin: 28px auto; border-radius: 24px; }
-        .sk-card { padding: 24px; margin-top: 24px; border-radius: 28px; background-color: var(--light-gray); }
+        .sk-card { padding: 24px; margin-top: 24px; border-radius: 28px; background-color: var(--container-bg); }
         .sk-card-item { display: flex; align-items: center; gap: 18px; margin-top: 18px; padding: 0; }
         .sk-icon { width: 52px; height: 52px; border-radius: 24px; flex-shrink: 0; }
         .sk-text-block { flex-grow: 1; }
@@ -105,8 +115,9 @@
         .sk-text-desc { height: 16px; width: 95%; border-radius: 8px; }
         .sk-footer-card { padding: 24px; margin-top: 24px; border-radius: 24px; }
         .sk-copy-btn { width: 160px; height: 50px; margin: 24px auto; border-radius: 28px; }
-        body { font-family: "Manrope", sans-serif; background-color: var(--background-color); margin: 0; padding: 0; font-weight: bold; color: var(--text-color); }
-        .container { max-width: 1200px; margin: 0 auto; background-color: var(--container-bg); box-shadow: 0 0 20px var(--shadow-color); z-index: 10; position: relative; }
+        
+        body { font-family: "Manrope", sans-serif; background-color: var(--background-color); margin: 0; padding: 0; font-weight: bold; color: var(--text-color); -webkit-tap-highlight-color: transparent; }
+        .container { max-width: 1200px; margin: 0 auto; background-color: var(--container-bg); box-shadow: 0 0 20px var(--shadow-color); z-index: 10; position: relative; padding-bottom: 80px; }
         .header { position: relative; }
         .header img { width: 100%; height: auto; display: block; }
         .lang-switcher, .theme-switcher { position: absolute; top: 10px; background-color: var(--header-bg); border-radius: 20px; border: 1px solid var(--primary-color); padding: 4px; display: flex; box-shadow: 0 2px 5px var(--shadow-color); z-index: 20; }
@@ -114,38 +125,34 @@
         .theme-switcher { left: 10px; }
        /* Основной эффект Liquid Glass */
 .lang-btn, .theme-btn { 
-    background: rgba(255, 255, 255, 0.25); /* Полупрозрачный фон */
-    backdrop-filter: blur(12px); /* Размытие фона под кнопкой */
-    -webkit-backdrop-filter: blur(12px); /* Обязательно для поддержки Safari/iOS */
-    border: 1px solid rgba(255, 255, 255, 0.4); /* Имитация блика на гранях стекла */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Легкая тень для объема */
+    background: rgba(255, 255, 255, 0.25); 
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px); 
+    border: 1px solid rgba(255, 255, 255, 0.4); 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); 
     padding: 8px 16px; 
     border-radius: 16px; 
     font-weight: bold; 
     cursor: pointer; 
-    transition: all 0.3s ease; /* Плавный переход для всех свойств */
+    transition: all 0.3s ease; 
     font-size: 12px; 
     color: var(--text-color);
 }
 
-/* Эффект при наведении (стекло становится чуть светлее) */
 .lang-btn:hover, .theme-btn:hover {
     background: rgba(255, 255, 255, 0.4);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Активная кнопка (Яркий зеленый с неоновым свечением) */
 .lang-btn.active, .theme-btn.active { 
-    background: var(--primary-color); 
-    color: white; 
+    background: var(--primary-color);     color: white; 
     border: 1px solid var(--primary-color);
-    box-shadow: 0 4px 15px rgba(0, 185, 86, 0.4); /* Эффект свечения в цвет кнопки */
+    box-shadow: 0 4px 15px rgba(0, 185, 86, 0.4); 
 }
 
-/* Адаптация стекла под ТЕМНУЮ ТЕМУ */
 body.dark .lang-btn, body.dark .theme-btn {
-    background: rgba(0, 0, 0, 0.3); /* Темное полупрозрачное стекло */
-    border: 1px solid rgba(255, 255, 255, 0.1); /* Очень тусклый блик */
+    background: rgba(0, 0, 0, 0.3); 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
     color: #eee;
 }
 body.dark .lang-btn:hover, body.dark .theme-btn:hover {
@@ -157,221 +164,282 @@ body.dark .lang-btn.active, body.dark .theme-btn.active {
     box-shadow: 0 4px 15px rgba(0, 185, 86, 0.4);
     color: #fff;
 }
-        .navigation { display: flex; justify-content: space-around; background-color: var(--nav-bg); padding: 10px 0; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 5px; }
-        .nav-link { text-decoration: none; font-weight: bold; font-size: 14px; padding: 8px 18px; border-radius: 20px; border: #00aa44 1px solid; transition: background-color 0.3s, color 0.3s; cursor: pointer; color: var(--text-color); }
-        .nav-link.active { background-color: var(--active-bg); color: var(--active-text); }
-        .tariff-content { display: none; }
-        .tariff-content.active { display: block; }
-        .unlimited-section { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; }
-        .unlimited-section .text, .total-price-text { flex-grow: 1; }
-        .infinity-icon { color: var(--primary-color); font-weight: bold; }
-        .tariff-section { padding: 15px; border-bottom: 1px solid var(--border-color); }
-        .tariff-section-header { display: flex; align-items: center; margin-bottom: 15px; }
-        .tariff-section-header h3 { margin: 0; flex-grow: 1; }
-        .info-icon { color: #888; cursor: pointer; margin-left: 10px; }
-        .options-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 12px; }
-        .option-button { border: 1px solid var(--option-border); color: var(--option-text); background-color: var(--option-bg); padding: 8px 5px; border-radius: 12px; text-align: center; font-size: 14px; cursor: pointer; transition: background-color 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s; }
-        .option-button:hover { box-shadow: var(--button-shadow); border-color: var(--primary-color); }
-        .option-button.active { background-color: var(--active-bg); color: var(--active-text); border-color: var(--primary-color); }
-        .total-price-display { text-align: center; font-size: 15px; font-weight: bold; padding: 20px 15px; }
-        
-        .options-card { background-color: var(--light-gray); border-radius: 25px; margin: 20px; padding: 15px; transition: all 0.3s ease; }
-        .card-header { font-weight: bold; margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding-bottom: 0; }
-        .accordion-content { overflow: hidden; max-height: 0; transition: max-height 0.4s ease-out, opacity 0.4s ease, margin-top 0.4s ease; opacity: 0; margin-top: 0; }
-        .options-card.open .accordion-content { max-height: 1000px; opacity: 1; margin-top: 15px; }
-        .options-card.open .card-header { margin-bottom: 0; }
-        .card-header::after { content: '❯'; font-size: 14px; color: var(--primary-color); transform: rotate(90deg); transition: transform 0.3s ease; }
-        .options-card.open .card-header::after { transform: rotate(-90deg); }
 
-        .card-item { display: flex; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
-        .card-item:last-child { border-bottom: none; }
-        .item-icon img { width: 50px; height: 50px; border-radius: 20px; margin-right: 15px; }
-        .item-title { font-weight: bold; }
-        .item-description { font-size: 14px; color: #666; line-height: 1.4; }
-        
-        .footer-container { padding: 10px 20px 20px; }
-        .card { background-color: var(--light-gray); border-radius: 20px; padding: 20px; margin-top: 15px; box-shadow: var(--card-shadow); font-size: 14px; line-height: 1.5; }
-        .copy-button-card { padding: 15px; text-align: center; }
-        .copy-button { background-color: var(--option-bg); color: var(--primary-color); border: 1px solid var(--primary-color); padding: 12px 25px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; transition: background-color 0.2s, box-shadow 0.2s; }
-        .copy-button:hover { background-color: #f0fff8; box-shadow: var(--button-shadow); }
-        .copy-button svg { margin-right: 8px; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal { background-color: var(--modal-bg); padding: 20px; border-radius: 15px; max-width: 80%; text-align: center; }
-        .modal-button { background-color: transparent; color: var(--primary-color); border: none; padding: 12px 24px; border-radius: 20px; cursor: pointer; font-weight: bold; width: 80%; margin-top: 15px; }
-        #toast-notification { visibility: hidden; min-width: 250px; background-color: var(--toast-bg); color: var(--toast-text); text-align: center; border-radius: 38px; padding: 16px; position: fixed; z-index: 2000; left: 50%; transform: translateX(-50%); bottom: 30px; font-size: 15px; opacity: 0; transition: opacity 0.5s, visibility 0.5s, bottom 0.5s; }
-        #toast-notification.show { visibility: visible; opacity: 1; bottom: 50px; }
-        .view-toggle { text-align: right; padding: 0 15px 10px; }
-        #view-toggle-btn { background: var(--light-gray); border: 1px solid var(--border-color); border-radius: 20px; padding: 8px 15px; font-weight: bold; cursor: pointer; color: var(--text-color); }
-        .slider-group { padding: 10px 25px 20px; }
-        .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .slider-label { font-size: 16px; }
-        .slider-value { font-size: 18px; color: var(--primary-color); font-weight: 800; }
-        .slider { -webkit-appearance: none; width: 100%; height: 8px; background: var(--slider-bg); outline: none; border-radius: 4px; opacity: 0.7; transition: opacity .2s; }
-        .slider:hover { opacity: 1; }
-        .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; background: var(--primary-color); cursor: pointer; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); }
-        .slider::-moz-range-thumb { width: 24px; height: 24px; background: var(--primary-color); cursor: pointer; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); }
-        .slider-minmax { display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-top: 5px; }
-        @media (max-width: 400px) {
-            .lang-switcher, .theme-switcher { padding: 2px; }
-            .lang-btn, .theme-btn { padding: 6px 10px; font-size: 11px; }
-            .options-grid { grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); }
-            .nav-link { font-size: 12px; padding: 8px 10px; }
-        }
-        #personal { padding: 15px; }
-        #personal .container-personal { max-width: 800px; margin: 0 auto; display: grid; gap: 25px; }
-        #personal .card { background-color: var(--personal-card-bg); border-radius: 16px; padding: 25px; border: 1px solid var(--personal-border); transition: box-shadow 0.3s ease; color: var(--personal-text-primary); margin-top: 0; }
-        #personal .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--personal-border); }
-        #personal .card-title { font-size: 20px; font-weight: 700; margin: 0; color: var(--brand-purple); }
-        #personal .configurator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        #personal .input-group { position: relative; display: flex; flex-direction: column; }
-        #personal .input-group label { font-size: 14px; font-weight: 600; color: var(--personal-text-secondary); margin-bottom: 8px; }
-        #personal .input-group input { width: 80%; padding: 12px 60px 12px 12px; border: 1px solid var(--personal-border); border-radius: 25px; font-size: 16px; font-family: 'Manrope', sans-serif; font-weight: 600; transition: all 0.2s ease; background-color: var(--personal-card-bg); color: var(--personal-text-primary); }
-        #personal .input-group input:focus { outline: none; border-color: var(--brand-green); box-shadow: 0 0 0 3px rgba(0, 185, 86, 0.15); }
-        #personal .input-unit { position: absolute; right: 15px; top: 42px; color: var(--personal-text-secondary); font-size: 14px; font-weight: 600; pointer-events: none; }
-        #personal .tariff-preview-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 15px; }
-        #personal .tariff-item { display: flex; justify-content: space-between; align-items: center; font-size: 16px; padding: 10px 0; }
-        #personal .tariff-item:not(:last-child){ border-bottom: 1px solid var(--personal-border); }
-        #personal .tariff-label { color: var(--personal-text-secondary); }
-        #personal .tariff-value { font-weight: 700; font-size: 17px; }
-        #personal #historyList { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
-        #personal .history-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 12px; border-radius: 10px; background-color: var(--light-gray); border: 1px solid var(--personal-border); }
-        #personal .history-details { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: var(--personal-text-secondary); }
-        #personal .history-values { font-weight: 600; color: var(--personal-text-primary); }
-        #personal .btn { display: flex; align-items: center; justify-content: center; width: 100%; border: none; padding: 14px; border-radius: 22px; cursor: pointer; font-size: 15px; font-weight: 700; font-family: 'Manrope', sans-serif; transition: all 0.2s ease; margin-top: 25px; }
-        #personal .btn-primary { background-color: var(--brand-green); color: white; }
-        #personal .btn-history { padding: 8px 12px; font-size: 12px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; }
-        #personal .btn-load { background-color: var(--brand-purple); color: white; }
-        #personal .btn-delete { background-color: var(--light-gray); color: var(--personal-text-primary); }
-        #personal .clear-all-btn { font-size: 13px; color: #999; background: none; border: none; cursor: pointer; padding: 0; }
-        #personal-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: var(--brand-purple); color: white; padding: 12px 25px; border-radius: 10px; font-size: 14px; font-weight: 600; opacity: 0; visibility: hidden; transition: all 0.4s ease; z-index: 1000; }
-        #personal-toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-10px); }
+/* === TELEGRAM STYLE BOTTOM NAVIGATION (POP-UP) === */
+.navigation { 
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(150%);
+    width: 90%; max-width: 600px; display: flex; justify-content: space-around; 
+    background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+    border-radius: 30px; padding: 8px 12px; border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 100; transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
 
-        /* === AI КНОПКА (DRAG & DROP) === */
-        #ai-fab {
-            position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px;
-            background: linear-gradient(135deg, var(--brand-green), #008833);
-            color: white; border-radius: 50%; border: none;
-            box-shadow: 0 6px 16px rgba(0, 170, 68, 0.4);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px; cursor: grab; z-index: 999; user-select: none; touch-action: none;
-            transition: transform 0.2s;
-        }
-        #ai-fab:active { cursor: grabbing; transform: scale(0.95); }
-        #ai-fab .ai-badge {
-            position: absolute; top: -2px; right: -2px; background: #ff3b30; font-size: 10px; font-weight: bold;
-            padding: 2px 6px; border-radius: 10px; border: 2px solid #fff;
-        }
+.navigation.show { transform: translateX(-50%) translateY(0); }
 
-        /* === AI ПАНЕЛЬ === */
-        .ai-backdrop {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s;
-        }
-        .ai-backdrop.show { opacity: 1; visibility: visible; }
-        
-        .ai-panel {
-            position: fixed; top: 0; right: -100%; width: 100%; max-width: 400px; height: 100%;
-            background: var(--container-bg); z-index: 1001; box-shadow: -4px 0 20px rgba(0,0,0,0.3);
-            transition: right 0.3s ease-in-out; display: flex; flex-direction: column; color: var(--text-color);
-        }
-        .ai-panel.open { right: 0; }
-        
-        .ai-header {
-            padding: 20px; border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center; background: var(--container-bg);
-        }
-        .ai-header h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; color: var(--primary-color); margin: 0; }
-        .ai-close { background: var(--light-gray); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 20px; cursor: pointer; color: var(--text-color); }
-        
-        /* AI Вкладки (Навигация) */
-        .ai-tabs {
-            display: flex; background: var(--light-gray); border-radius: 12px; padding: 4px;
-            margin-top: 15px; gap: 4px; border: 1px solid var(--border-color);
-        }
-        .ai-tab {
-            flex: 1; padding: 10px 4px; text-align: center; font-size: 11px; font-weight: 800;
-            border-radius: 8px; cursor: pointer; border: none; background: transparent;
-            color: var(--text-color); transition: all 0.2s; font-family: var(--font-family);
-        }
-        .ai-tab.active { background: var(--primary-color); color: #fff; box-shadow: var(--button-shadow); }
+body.dark .navigation { background: rgba(30, 30, 30, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); }
 
-        .ai-search-box { padding: 20px; border-bottom: 1px solid var(--border-color); }
-        .ai-search-box label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
-        .ai-input-group { display: flex; gap: 10px; }
-        .ai-input-group input {
-            flex: 1; padding: 12px 16px; border: 2px solid var(--border-color); border-radius: 12px;
-            font-size: 16px; font-weight: 700; font-family: var(--font-family); outline: none; transition: 0.2s;
-            background: var(--light-gray); color: var(--text-color);
-        }
-        .ai-input-group input:focus { border-color: var(--primary-color); }
-        .ai-input-group button {
-            padding: 0 20px; background: var(--primary-color); color: #fff; border: none; border-radius: 12px;
-            font-weight: 700; cursor: pointer; font-family: var(--font-family);
-        }
+.nav-link { 
+    text-decoration: none; font-weight: 700; font-size: 14px; padding: 10px 15px; border-radius: 22px; border: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; color: rgba(255, 255, 255, 0.6); 
+    position: relative; z-index: 2; white-space: nowrap;
+}
 
-        /* === ДИЗАЙН КАРТОЧЕК AI === */
-        .ai-results { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #fafafa; }
-        body.dark .ai-results { background: #1a1a1a; }
-        .ai-empty { text-align: center; color: var(--text-color); opacity: 0.6; margin-top: 40px; font-size: 14px; }
-        
-        .ai-card { background: #f4f9f6; border-radius: 20px; padding: 20px; border: none; animation: slideUp 0.3s ease-out; color: var(--text-color); }
-        body.dark .ai-card { background: #232b26; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .ai-tag { display: inline-block; font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 12px; margin-bottom: 12px; text-transform: uppercase; color: #fff; }
-        .tag-blue { background: #2d98da; }
-        .tag-green { background: #00B956; }
-        .tag-purple { background: #7A00B9; }
-        
-        .ai-card-main-title { font-size: 22px; font-weight: 800; margin-bottom: 15px; color: var(--text-color); }
-        
-        .ai-feature-list { list-style: none; padding: 0; margin: 0 0 20px 0; }
-        .ai-feature-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 14px; font-weight: 600; color: #555; }
-        body.dark .ai-feature-item { color: #ccc; }
-        .ai-feature-icon { width: 22px; height: 22px; color: #7A00B9; flex-shrink: 0; }
-        
-        .ai-bonus-badge { color: var(--brand-purple); font-weight: 800; display: inline-flex; align-items: center; gap: 4px; margin-left: 5px; }
-        
-        .ai-unlim-row { display: flex; align-items: center; gap: 10px; margin-top: 15px; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 12px; }
-        body.dark .ai-unlim-row { background: rgba(255,255,255,0.05); }
-        .ai-unlim-icons { display: flex; flex-shrink: 0; }
-        .ai-unlim-icons img { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #f4f9f6; margin-left: -10px; object-fit: cover; }
-        body.dark .ai-unlim-icons img { border-color: #232b26; }
-        .ai-unlim-icons img:first-child { margin-left: 0; }
-        .ai-unlim-text { font-size: 11px; line-height: 1.3; font-weight: 500; color: #666; }
-        body.dark .ai-unlim-text { color: #aaa; }
-        
-        .ai-price-block { font-size: 32px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: baseline; gap: 6px; color: var(--text-color); }
-        .ai-price-block small { font-size: 14px; font-weight: 600; color: #888; text-transform: uppercase; }
-        
-        .ai-actions { display: flex; gap: 10px; }
-        .ai-btn-apply { flex: 1; background: #00B956; color: #fff; border: none; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0, 185, 86, 0.2); }
-        .ai-btn-apply:active { transform: scale(0.96); }
-        .ai-btn-copy { flex: 1; background: transparent; border: 2px solid #00B956; color: #00B956; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.2s; }
-        .ai-btn-copy:active { transform: scale(0.96); background: rgba(0, 185, 86, 0.1); }
+.nav-link.active { background: var(--primary-color); color: #fff; box-shadow: 0 4px 12px rgba(0, 170, 68, 0.4); transform: translateY(-1px); }
 
-        #device-conflict-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 10000; }
-        .conflict-box { background: var(--container-bg, #fff); padding: 30px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .conflict-box h2 { color: #e74c3c; margin-top: 0; }
-        .conflict-box p { color: var(--text-color, #333); margin-bottom: 20px; line-height: 1.5; font-weight: 600;}
-        .conflict-btn { background: var(--primary-color, #00B956); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; font-size: 14px; }
-        .conflict-btn-logout { background: #e74c3c; }
+.nav-link:active, .option-button:active, button:active { transform: scale(0.95); outline: none; -webkit-tap-highlight-color: transparent; }
+
+.tariff-content { display: none; }
+.tariff-content.active { display: block; }
+.unlimited-section { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; }
+.unlimited-section .text, .total-price-text { flex-grow: 1; }
+.infinity-icon { color: var(--primary-color); font-weight: bold; }
+.tariff-section { padding: 15px; border-bottom: 1px solid var(--border-color); }
+.tariff-section-header { display: flex; align-items: center; margin-bottom: 10px; }.tariff-section-header h3 { margin: 0; flex-grow: 1; font-size: 16px; }
+.info-icon { color: #888; cursor: pointer; margin-left: 10px; }
+
+.options-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 8px; }
+.option-button { 
+    border: 1px solid var(--option-border); color: var(--option-text); background-color: var(--option-bg); 
+    padding: 6px 4px; border-radius: 10px; text-align: center; font-size: 13px; cursor: pointer; transition: all 0.2s ease; 
+}
+.option-button:hover { border-color: var(--primary-color); }
+.option-button.active { background-color: var(--active-bg); color: var(--active-text); border-color: var(--primary-color); box-shadow: 0 2px 8px rgba(0, 170, 68, 0.2); }
+
+.total-price-display { text-align: center; font-size: 15px; font-weight: bold; padding: 20px 15px; }
+        
+.options-card { background-color: var(--light-gray); border-radius: 25px; margin: 20px; padding: 15px; transition: all 0.3s ease; }
+.card-header { font-weight: bold; margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding-bottom: 0; }
+.accordion-content { overflow: hidden; max-height: 0; transition: max-height 0.4s ease-out, opacity 0.4s ease, margin-top 0.4s ease; opacity: 0; margin-top: 0; }
+.options-card.open .accordion-content { max-height: 1000px; opacity: 1; margin-top: 15px; }
+.options-card.open .card-header { margin-bottom: 0; }
+.card-header::after { content: '❯'; font-size: 14px; color: var(--primary-color); transform: rotate(90deg); transition: transform 0.3s ease; }
+.options-card.open .card-header::after { transform: rotate(-90deg); }
+
+.card-item { display: flex; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
+.card-item:last-child { border-bottom: none; }
+.item-icon img { width: 50px; height: 50px; border-radius: 20px; margin-right: 15px; }
+.item-title { font-weight: bold; }
+.item-description { font-size: 14px; color: #666; line-height: 1.4; }
+        
+.footer-container { padding: 10px 20px 20px; position: relative; }
+
+/* Стиль карточки текста тарифа */
+.card { 
+    background-color: var(--light-gray); 
+    border-radius: 20px; 
+    padding: 20px; 
+    margin-top: 15px; 
+    box-shadow: var(--card-shadow); 
+    font-size: 14px; 
+    line-height: 1.5; 
+    position: relative; 
+    cursor: pointer; /* Показываем, что можно нажать */
+    transition: transform 0.1s ease, background-color 0.2s;
+    user-select: none; /* Запрещаем выделение текста при клике */
+}
+
+/* Эффект нажатия на карточку */
+.card:active {
+    transform: scale(0.98);
+    background-color: rgba(0, 170, 68, 0.1); /* Легкий зеленый оттенок */
+}
+.copy-button-card { padding: 15px; text-align: center; }
+
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+.modal { background-color: var(--modal-bg); padding: 20px; border-radius: 15px; max-width: 80%; text-align: center; }
+.modal-button { background-color: transparent; color: var(--primary-color); border: none; padding: 12px 24px; border-radius: 20px; cursor: pointer; font-weight: bold; width: 80%; margin-top: 15px; }
+#toast-notification { visibility: hidden; min-width: 250px; background-color: var(--toast-bg); color: var(--toast-text); text-align: center; border-radius: 38px; padding: 16px; position: fixed; z-index: 2000; left: 50%; transform: translateX(-50%); bottom: 100px; font-size: 15px; opacity: 0; transition: opacity 0.5s, visibility 0.5s, bottom 0.5s; }
+#toast-notification.show { visibility: visible; opacity: 1; bottom: 120px; }
+.view-toggle { text-align: right; padding: 0 15px 10px; }
+#view-toggle-btn { background: var(--light-gray); border: 1px solid var(--border-color); border-radius: 20px; padding: 8px 15px; font-weight: bold; cursor: pointer; color: var(--text-color); }
+.slider-group { padding: 10px 25px 20px; }
+.slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.slider-label { font-size: 16px; }
+.slider-value { font-size: 18px; color: var(--primary-color); font-weight: 800; }
+.slider { -webkit-appearance: none; width: 100%; height: 8px; background: var(--slider-bg); outline: none; border-radius: 4px; opacity: 0.7; transition: opacity .2s; }
+.slider:hover { opacity: 1; }
+.slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; background: var(--primary-color); cursor: pointer; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); }
+.slider::-moz-range-thumb { width: 24px; height: 24px; background: var(--primary-color); cursor: pointer; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); }
+.slider-minmax { display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-top: 5px; }
+@media (max-width: 400px) {
+    .lang-switcher, .theme-switcher { padding: 2px; }
+    .lang-btn, .theme-btn { padding: 6px 10px; font-size: 11px; }
+    .options-grid { grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); }
+    .nav-link { font-size: 12px; padding: 8px 10px; }
+}
+#personal { padding: 15px; }
+#personal .container-personal { max-width: 800px; margin: 0 auto; display: grid; gap: 25px; }
+#personal .card { background-color: var(--personal-card-bg); border-radius: 16px; padding: 25px; border: 1px solid var(--personal-border); transition: box-shadow 0.3s ease; color: var(--personal-text-primary); margin-top: 0; }
+#personal .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--personal-border); }
+#personal .card-title { font-size: 20px; font-weight: 700; margin: 0; color: var(--brand-purple); }
+#personal .configurator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+#personal .input-group { position: relative; display: flex; flex-direction: column; }
+#personal .input-group label { font-size: 14px; font-weight: 600; color: var(--personal-text-secondary); margin-bottom: 8px; }
+#personal .input-group input { width: 80%; padding: 12px 60px 12px 12px; border: 1px solid var(--personal-border); border-radius: 25px; font-size: 16px; font-family: 'Manrope', sans-serif; font-weight: 600; transition: all 0.2s ease; background-color: var(--personal-card-bg); color: var(--personal-text-primary); }
+#personal .input-group input:focus { outline: none; border-color: var(--brand-green); box-shadow: 0 0 0 3px rgba(0, 185, 86, 0.15); }
+#personal .input-unit { position: absolute; right: 15px; top: 42px; color: var(--personal-text-secondary); font-size: 14px; font-weight: 600; pointer-events: none; }
+#personal .tariff-preview-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 15px; }
+#personal .tariff-item { display: flex; justify-content: space-between; align-items: center; font-size: 16px; padding: 10px 0; }
+#personal .tariff-item:not(:last-child){ border-bottom: 1px solid var(--personal-border); }
+#personal .tariff-label { color: var(--personal-text-secondary); }
+#personal .tariff-value { font-weight: 700; font-size: 17px; }
+#personal #historyList { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+#personal .history-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 12px; border-radius: 10px; background-color: var(--light-gray); border: 1px solid var(--personal-border); }
+#personal .history-details { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: var(--personal-text-secondary); }
+#personal .history-values { font-weight: 600; color: var(--personal-text-primary); }
+#personal .btn { display: flex; align-items: center; justify-content: center; width: 100%; border: none; padding: 14px; border-radius: 22px; cursor: pointer; font-size: 15px; font-weight: 700; font-family: 'Manrope', sans-serif; transition: all 0.2s ease; margin-top: 25px; }
+#personal .btn-primary { background-color: var(--brand-green); color: white; }
+#personal .btn-history { padding: 8px 12px; font-size: 12px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; }
+#personal .btn-load { background-color: var(--brand-purple); color: white; }
+#personal .btn-delete { background-color: var(--light-gray); color: var(--personal-text-primary); }
+#personal .clear-all-btn { font-size: 13px; color: #999; background: none; border: none; cursor: pointer; padding: 0; }#personal-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: var(--brand-purple); color: white; padding: 12px 25px; border-radius: 10px; font-size: 14px; font-weight: 600; opacity: 0; visibility: hidden; transition: all 0.4s ease; z-index: 1000; }
+#personal-toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-10px); }
+
+/* === AI КНОПКА (DRAG & DROP) === */
+#ai-fab {
+    position: fixed; bottom: 90px; right: 20px; width: 60px; height: 60px;
+    background: linear-gradient(135deg, var(--brand-green), #008833);
+    color: white; border-radius: 50%; border: none;
+    box-shadow: 0 6px 16px rgba(0, 170, 68, 0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; cursor: grab; z-index: 99; user-select: none; touch-action: none;
+    transition: transform 0.2s;
+}
+#ai-fab:active { cursor: grabbing; transform: scale(0.95); }
+#ai-fab .ai-badge {
+    position: absolute; top: -2px; right: -2px; background: #ff3b30; font-size: 10px; font-weight: bold;
+    padding: 2px 6px; border-radius: 10px; border: 2px solid #fff;
+}
+
+/* === AI ПАНЕЛЬ === */
+.ai-backdrop {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s;
+}
+.ai-backdrop.show { opacity: 1; visibility: visible; }
+    
+.ai-panel {
+    position: fixed; top: 0; right: -100%; width: 100%; max-width: 400px; height: 100%;
+    background: var(--container-bg); z-index: 1001; box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+    transition: right 0.3s ease-in-out; display: flex; flex-direction: column; color: var(--text-color);
+}
+.ai-panel.open { right: 0; }
+    
+.ai-header {
+    padding: 20px; border-bottom: 1px solid var(--border-color);
+    display: flex; justify-content: space-between; align-items: center; background: var(--container-bg);
+}
+.ai-header h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; color: var(--primary-color); margin: 0; }
+.ai-close { background: var(--light-gray); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 20px; cursor: pointer; color: var(--text-color); }
+    
+/* AI Вкладки (Навигация) */
+.ai-tabs {
+    display: flex; background: var(--light-gray); border-radius: 12px; padding: 4px;
+    margin-top: 15px; gap: 4px; border: 1px solid var(--border-color);
+}
+.ai-tab {
+    flex: 1; padding: 10px 4px; text-align: center; font-size: 11px; font-weight: 800;
+    border-radius: 8px; cursor: pointer; border: none; background: transparent;
+    color: var(--text-color); transition: all 0.2s; font-family: var(--font-family);
+}.ai-tab.active { background: var(--primary-color); color: #fff; box-shadow: var(--button-shadow); }
+
+.ai-search-box { padding: 20px; border-bottom: 1px solid var(--border-color); }
+.ai-search-box label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.ai-input-group { display: flex; gap: 10px; }
+.ai-input-group input {
+    flex: 1; padding: 12px 16px; border: 2px solid var(--border-color); border-radius: 12px;
+    font-size: 16px; font-weight: 700; font-family: var(--font-family); outline: none; transition: 0.2s;
+    background: var(--light-gray); color: var(--text-color);
+}
+.ai-input-group input:focus { border-color: var(--primary-color); }
+.ai-input-group button {
+    padding: 0 20px; background: var(--primary-color); color: #fff; border: none; border-radius: 12px;
+    font-weight: 700; cursor: pointer; font-family: var(--font-family);
+}
+
+/* === ДИЗАЙН КАРТОЧЕК AI === */
+.ai-results { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #fafafa; }
+body.dark .ai-results { background: #1a1a1a; }
+.ai-empty { text-align: center; color: var(--text-color); opacity: 0.6; margin-top: 40px; font-size: 14px; }
+    
+.ai-card { background: #f4f9f6; border-radius: 20px; padding: 20px; border: none; animation: slideUp 0.3s ease-out; color: var(--text-color); }
+body.dark .ai-card { background: #232b26; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+.ai-tag { display: inline-block; font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 12px; margin-bottom: 12px; text-transform: uppercase; color: #fff; }
+.tag-blue { background: #2d98da; }
+.tag-green { background: #00B956; }
+.tag-purple { background: #7A00B9; }
+    
+.ai-card-main-title { font-size: 22px; font-weight: 800; margin-bottom: 15px; color: var(--text-color); }
+    
+.ai-feature-list { list-style: none; padding: 0; margin: 0 0 20px 0; }
+.ai-feature-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 14px; font-weight: 600; color: #555; }
+body.dark .ai-feature-item { color: #ccc; }
+.ai-feature-icon { width: 22px; height: 22px; color: #7A00B9; flex-shrink: 0; }
+    
+.ai-bonus-badge { color: var(--brand-purple); font-weight: 800; display: inline-flex; align-items: center; gap: 4px; margin-left: 5px; }
+    
+.ai-unlim-row { display: flex; align-items: center; gap: 10px; margin-top: 15px; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 12px; }
+body.dark .ai-unlim-row { background: rgba(255,255,255,0.05); }
+.ai-unlim-icons { display: flex; flex-shrink: 0; }
+.ai-unlim-icons img { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #f4f9f6; margin-left: -10px; object-fit: cover; }
+body.dark .ai-unlim-icons img { border-color: #232b26; }
+.ai-unlim-icons img:first-child { margin-left: 0; }
+.ai-unlim-text { font-size: 11px; line-height: 1.3; font-weight: 500; color: #666; }
+body.dark .ai-unlim-text { color: #aaa; }
+    
+.ai-price-block { font-size: 32px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: baseline; gap: 6px; color: var(--text-color); }
+.ai-price-block small { font-size: 14px; font-weight: 600; color: #888; text-transform: uppercase; }    
+.ai-actions { display: flex; gap: 10px; }
+.ai-btn-apply { flex: 1; background: #00B956; color: #fff; border: none; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0, 185, 86, 0.2); }
+.ai-btn-apply:active { transform: scale(0.96); }
+.ai-btn-copy { flex: 1; background: transparent; border: 2px solid #00B956; color: #00B956; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.2s; }
+.ai-btn-copy:active { transform: scale(0.96); background: rgba(0, 185, 86, 0.1); }
+
+#device-conflict-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 10000; }
+.conflict-box { background: var(--container-bg, #fff); padding: 30px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.conflict-box h2 { color: #e74c3c; margin-top: 0; }
+.conflict-box p { color: var(--text-color, #333); margin-bottom: 20px; line-height: 1.5; font-weight: 600;}
+.conflict-btn { background: var(--primary-color, #00B956); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; font-size: 14px; }
+.conflict-btn-logout { background: #e74c3c; }
     </style>
 </head>
 
 <body>
     
+    <!-- Скелетон -->
     <div id="loading-skeleton" class="skeleton-wrapper">
         <div class="sk-item sk-header"><div class="sk-header-buttons"><div class="sk-button-group"><div class="sk-item sk-button-sm"></div><div class="sk-item sk-button-sm"></div></div><div class="sk-button-group"><div class="sk-item sk-button-sm"></div><div class="sk-item sk-button-sm"></div></div></div></div>
         <div class="sk-nav"><div class="sk-item sk-nav-btn"></div><div class="sk-item sk-nav-btn"></div><div class="sk-item sk-nav-btn"></div><div class="sk-item sk-nav-btn"></div></div>
-        <div class="sk-content"><div class="sk-item sk-line sk-line-medium"></div><div class="sk-section"><div class="sk-item sk-line sk-line-short"></div><div class="sk-grid"><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div></div></div><div class="sk-section"><div class="sk-item sk-line sk-line-short"></div><div class="sk-grid"><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div></div></div><div class="sk-item sk-price"></div><div class="sk-card"><div class="sk-item sk-line sk-line-short"></div><div class="sk-card-item"><div class="sk-item sk-icon"></div><div class="sk-text-block"><div class="sk-item sk-text-title"></div><div class="sk-item sk-text-desc"></div></div></div><div class="sk-card-item"><div class="sk-item sk-icon"></div><div class="sk-text-block"><div class="sk-item sk-text-title"></div><div class="sk-item sk-text-desc"></div></div></div></div><div class="sk-footer-card"><div class="sk-item sk-line" style="width: 95%"></div><div class="sk-item sk-line" style="width: 80%"></div></div><div class="sk-item sk-copy-btn"></div></div>
+        <div class="sk-content">
+            <div class="sk-item sk-line sk-line-medium"></div>
+            <div class="sk-section">
+                <div class="sk-item sk-line sk-line-short"></div>
+                <div class="sk-grid"><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div></div>
+            </div>
+            <div class="sk-section">
+                <div class="sk-item sk-line sk-line-short"></div>
+                <div class="sk-grid"><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div><div class="sk-item sk-grid-item"></div></div>
+            </div>
+            <div class="sk-item sk-price"></div>
+            <div class="sk-card">
+                <div class="sk-item sk-line sk-line-short"></div>
+                <div class="sk-card-item"><div class="sk-item sk-icon"></div><div class="sk-text-block"><div class="sk-item sk-text-title"></div><div class="sk-item sk-text-desc"></div></div></div>
+                <div class="sk-card-item"><div class="sk-item sk-icon"></div><div class="sk-text-block"><div class="sk-item sk-text-title"></div><div class="sk-item sk-text-desc"></div></div></div>
+            </div>
+            <div class="sk-footer-card">
+                <div class="sk-item sk-line" style="width: 95%"></div>
+                <div class="sk-item sk-line" style="width: 80%"></div>
+            </div>
+            <div class="sk-item sk-copy-btn"></div>
+        </div>
     </div>
 
     <div id="device-conflict-modal">
     <div class="conflict-box">
         <h2>⚠️ Внимание!</h2>
-        <p>Перед входом сначала выйдете из другого устройства или удалите устройство из раздела "Устройства".</p>
-        <button id="btn-force-login" class="conflict-btn">Удалить другое устройство и войти</button>
+        <p>Перед входом сначала выйдете из другого устройства или удалите устройство из раздела "Устройства".</p>        <button id="btn-force-login" class="conflict-btn">Удалить другое устройство и войти</button>
         <button onclick="firebase.auth().signOut()" class="conflict-btn conflict-btn-logout">Выйти из аккаунта</button>
     </div>
 </div>
@@ -389,7 +457,8 @@ body.dark .lang-btn.active, body.dark .theme-btn.active {
             </div>
         </div>
 
-        <div class="navigation">
+        <!-- Навигация -->
+        <div class="navigation show">
             <a class="nav-link active" onclick="switchTab('life1')" data-translate-key="nav_life1"></a>
             <a class="nav-link" onclick="switchTab('life2')" data-translate-key="nav_life2"></a>
             <a class="nav-link" onclick="switchTab('personal')" data-translate-key="nav_personal"></a>
@@ -397,7 +466,7 @@ body.dark .lang-btn.active, body.dark .theme-btn.active {
         </div>
 
         <div id="life1" class="tariff-content active">
-            <div class="unlimited-section"><span>📞</span><span class="text" data-translate-key="unlimited_in_network">&nbsp;</span><span class="infinity-icon">∞</span></div>
+            <div class="unlimited-section"><span>📞</span><span class="text" data-translate-key="unlimited_in_network"> </span><span class="infinity-icon">∞</span></div>
             <div class="tariff-section"><div class="tariff-section-header"><h3 data-translate-key="minutes_rt"></h3><span class="info-icon" onclick="showModal('modal-minutes1')">ⓘ</span></div><div class="options-grid" id="minutes-options1"></div></div>
             <div class="tariff-section"><div class="tariff-section-header"><h3 data-translate-key="sms"></h3><span class="info-icon" onclick="showModal('modal-sms1')">ⓘ</span></div><div class="options-grid" id="sms-options1"></div></div>
             <div class="tariff-section"><div class="tariff-section-header"><h3 data-translate-key="internet"></h3><span class="info-icon" onclick="showModal('modal-internet1')">ⓘ</span></div><div class="options-grid" id="internet-options1"></div></div>
@@ -410,11 +479,19 @@ body.dark .lang-btn.active, body.dark .theme-btn.active {
                     <div class="card-item"><div class="item-icon"><img src="https://shop-megafontj.github.io/tariff/call.png" alt="Call icon"></div><div class="item-details"><div class="item-title" data-translate-key="in_network_calls"></div><div class="item-description" data-translate-key="in_network_calls_desc"></div></div></div>
                 </div>
             </div>
-            <div class="footer-container"><div class="card footer-text-card"><div id="footer-text-container1"></div></div><div class="card copy-button-card"><button id="copy-button1" class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1zM9.5 1h-3a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5zM4 3.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v10a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5z"/></svg><span data-translate-key="copy_button"></span></button></div></div><div id="bonus-container1" style="display: none;" class="footer-container"><div class="card"><p id="bonus-text1"></p></div><div class="card copy-button-card"><button id="copy-bonus-button1" class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1zM9.5 1h-3a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5zM4 3.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v10a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5z"/></svg><span data-translate-key="copy_button"></span></button></div></div>
-        </div>
+            
+            <!-- Контейнер с текстом (теперь кликабельный целиком) -->
+            <div class="footer-container">
+                <div class="card footer-text-card" id="copy-area-1"><div id="footer-text-container1"></div></div>
+            </div>
+            
+            <!-- Блок бонуса для Life 1 (тоже кликабельный) -->
+            <div id="bonus-container1" style="display: none;" class="footer-container">
+                <div class="card" id="copy-bonus-area-1"><p id="bonus-text1"></p></div>
+            </div>        </div>
 
         <div id="life2" class="tariff-content">
-            <div class="unlimited-section"><span>📞</span><span class="text" data-translate-key="unlimited_in_network">&nbsp;</span><span class="infinity-icon">∞</span></div>
+            <div class="unlimited-section"><span>📞</span><span class="text" data-translate-key="unlimited_in_network"> </span><span class="infinity-icon">∞</span></div>
             <div class="view-toggle"><button id="view-toggle-btn" data-translate-key="view_toggle_grid"></button></div>
             <div id="grid-view-life2"><div class="tariff-section"><div class="tariff-section-header"><h3 data-translate-key="minutes_rt"></h3><span class="info-icon" onclick="showModal('modal-minutes2')">ⓘ</span></div><div class="options-grid" id="minutes-options2"></div></div><div class="tariff-section"><div class="tariff-section-header"><h3 data-translate-key="sms"></h3><span class="info-icon" onclick="showModal('modal-sms2')">ⓘ</span></div><div class="options-grid" id="sms-options2"></div></div><div class="tariff-section"><div class="tariff-section-header"><h3 data-translate-key="internet"></h3><span class="info-icon" onclick="showModal('modal-internet2')">ⓘ</span></div><div class="options-grid" id="internet-options2"></div></div></div>
             <div id="slider-view-life2" style="display: none;"><div class="slider-group"><div class="slider-header"><span class="slider-label" data-translate-key="internet"></span><span class="slider-value" id="internet-slider-value"></span></div><input type="range" id="internet-slider" class="slider" step="1"><div class="slider-minmax"><span id="internet-slider-min"></span><span id="internet-slider-max"></span></div></div><div class="slider-group"><div class="slider-header"><span class="slider-label" data-translate-key="minutes_rt"></span><span class="slider-value" id="minutes-slider-value"></span></div><input type="range" id="minutes-slider" class="slider" step="1"><div class="slider-minmax"><span id="minutes-slider-min"></span><span id="minutes-slider-max"></span></div></div><div class="slider-group"><div class="slider-header"><span class="slider-label" data-translate-key="sms"></span><span class="slider-value" id="sms-slider-value"></span></div><input type="range" id="sms-slider" class="slider" step="1"><div class="slider-minmax"><span id="sms-slider-min"></span><span id="sms-slider-max"></span></div></div></div>
@@ -429,7 +506,16 @@ body.dark .lang-btn.active, body.dark .theme-btn.active {
                     <div class="card-item"><div class="item-icon"><img src="https://shop-megafontj.github.io/tariff/iviicon.png" alt="IVI icon"></div><div class="item-details"><div class="item-title" data-translate-key="ivi_cinema"></div><div class="item-description" data-translate-key="ivi_cinema_desc"></div></div></div>
                 </div>
             </div>
-            <div class="footer-container"><div class="card footer-text-card"><div id="footer-text-container2"></div></div><div class="card copy-button-card"><button id="copy-button2" class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1zM9.5 1h-3a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5zM4 3.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v10a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5z"/></svg><span data-translate-key="copy_button"></span></button></div></div><div id="bonus-container2" style="display: none;" class="footer-container"><div class="card"><p id="bonus-text2"></p></div><div class="card copy-button-card"><button id="copy-bonus-button2" class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1zM9.5 1h-3a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5zM4 3.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v10a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5z"/></svg><span data-translate-key="copy_button"></span></button></div></div>
+            
+            <!-- Контейнер с текстом (кликабельный) -->
+            <div class="footer-container">
+                <div class="card footer-text-card" id="copy-area-2"><div id="footer-text-container2"></div></div>
+            </div>
+            
+            <!-- Блок бонуса для Life 2 (кликабельный) -->
+            <div id="bonus-container2" style="display: none;" class="footer-container">
+                <div class="card" id="copy-bonus-area-2"><p id="bonus-text2"></p></div>
+            </div>
         </div>
 
         <div id="personal" class="tariff-content"><div class="container-personal"><div class="card"><div class="card-header"><h2 class="card-title" data-translate-key="personal_config_title"></h2></div><div class="configurator-grid"><div class="input-group"><label for="price" data-translate-key="personal_price_label"></label><input type="number" id="price" value="" step="0.01"><span class="input-unit" data-translate-key="personal_price_unit"></span></div><div class="input-group"><label for="minutes" data-translate-key="personal_minutes_label"></label><input type="number" id="minutes" value=""><span class="input-unit" data-translate-key="personal_minutes_unit"></span></div><div class="input-group"><label for="gigabytes" data-translate-key="personal_gb_label"></label><input type="number" id="gigabytes" value=""><span class="input-unit" data-translate-key="personal_gb_unit"></span></div><div class="input-group"><label for="sms" data-translate-key="personal_sms_label"></label><input type="number" id="sms" value=""><span class="input-unit" data-translate-key="personal_sms_unit"></span></div></div></div><div class="card"><div class="card-header"><h2 class="card-title" data-translate-key="personal_preview_title"></h2><img src="https://raw.githubusercontent.com/shop-megafontj/bisozz/refs/heads/main/icon.jpg" alt="Megafon Logo" style="height: 30px; border-radius: 50%;"></div><ul class="tariff-preview-list"><li class="tariff-item"><span class="tariff-label" data-translate-key="personal_preview_price"></span><span class="tariff-value"><span id="price-display">0</span> <span data-translate-key="personal_price_unit"></span></span></li><li class="tariff-item"><span class="tariff-label" data-translate-key="personal_preview_minutes"></span><span class="tariff-value"><span id="minutes-display">0</span> <span data-translate-key="personal_minutes_unit"></span></span></li><li class="tariff-item"><span class="tariff-label" data-translate-key="personal_preview_gb"></span><span class="tariff-value"><span id="gb-display">0</span> <span data-translate-key="personal_gb_unit"></span></span></li><li class="tariff-item"><span class="tariff-label" data-translate-key="personal_preview_sms"></span><span class="tariff-value"><span id="sms-display">0</span> <span data-translate-key="personal_sms_unit_plural"></span></span></li><li class="tariff-item"><span class="tariff-label" data-translate-key="personal_preview_night"></span><span class="tariff-value" data-translate-key="personal_preview_unlimited"></span></li></ul><button class="btn btn-primary" id="copyAndSaveBtn" data-translate-key="personal_copy_save_btn"></button></div><div class="card" id="historyCard" style="display: none;"><div class="card-header"><h2 class="card-title" data-translate-key="personal_history_title"></h2><button class="clear-all-btn" id="clearAllHistoryBtn" data-translate-key="personal_history_clear"></button></div><ul id="historyList"></ul></div></div></div>
@@ -451,8 +537,7 @@ body.dark .lang-btn.active, body.dark .theme-btn.active {
         <div class="ai-search-box">
             <label>Желаемый бюджет (сомони):</label>
             <div class="ai-input-group">
-                <input type="number" id="ai-budget" placeholder="Например: 100">
-                <button id="ai-search-btn">Искать</button>
+                <input type="number" id="ai-budget" placeholder="Например: 100">                <button id="ai-search-btn">Искать</button>
             </div>
             <p style="font-size: 11px; opacity: 0.6; margin-top: 8px;">Ищем лучшие тарифы (диапазон ±5 сомони)</p>
             
@@ -501,8 +586,7 @@ body.dark .lang-btn.active, body.dark .theme-btn.active {
             firebase.initializeApp(firebaseConfig);
         }
         const database = firebase.database();
-        const auth = firebase.auth(); 
-        
+        const auth = firebase.auth();         
         // --- 2. GLOBAL VARIABLES ---
         let translations = {};
         let config1 = {};
@@ -551,8 +635,7 @@ body.dark .lang-btn.active, body.dark .theme-btn.active {
                     const modelMatch = ua.match(/Android.*?; (.*?)(?:\sBuild\/|\))/i);
                     if (modelMatch && modelMatch[1] && !['wv', 'K', 'X11'].includes(modelMatch[1])) {
                         model = modelMatch[1].replace(/^[a-z]{2}-[a-z]{2};\s*/i, '').trim();
-                    }
-                }
+                    }                }
             } 
             else if (/iPhone/i.test(ua)) {
                 model = "Apple iPhone";
@@ -602,7 +685,6 @@ let appInitialized = false;
                 else if (Date.now() - parseInt(loginTime) > LOGOUT_TIME_MS) {
                     auth.signOut(); localStorage.removeItem(loginTimeKey); return;
                 }
-
                 try {
                     const devInfo = await getExtendedDeviceInfo();
                     database.ref('/users/' + user.uid + '/activeDevice').on('value', async snap => {
@@ -651,8 +733,7 @@ let appInitialized = false;
                         }
                     });
 
-                } catch (error) {
-                    console.error("Ошибка при проверке устройства:", error);
+                } catch (error) {                    console.error("Ошибка при проверке устройства:", error);
                 }
 
             } else {
@@ -688,6 +769,7 @@ let appInitialized = false;
                         
                         initializeAppLogic(user);
 
+                        // Здесь скелетон исчезает, а контейнер появляется
                         document.getElementById('loading-skeleton').style.display = 'none';
                         document.querySelector('.container').style.display = 'block';
 
@@ -700,8 +782,7 @@ let appInitialized = false;
                 });
             }).catch(error => {
                 console.error("Auth / Role error:", error);
-                auth.signOut();
-            });
+                auth.signOut();            });
         }
 
         function showDataError(msg) {
@@ -750,8 +831,7 @@ let appInitialized = false;
 
             window.showModal = function(modalId) { document.getElementById(modalId).style.display = 'flex'; }
             window.hideModal = function(modalId) { document.getElementById(modalId).style.display = 'none'; }
-            window.switchTab = switchTab;
-            
+            window.switchTab = switchTab;            
             window.toggleAccordion = function(element) { element.classList.toggle('open'); }
 
             function showToast(messageKey, isRawString = false) {
@@ -792,7 +872,7 @@ let appInitialized = false;
                     if (value === config.state[`selected${type.charAt(0).toUpperCase() + type.slice(1)}`]) {
                         btn.classList.add("active");
                     }
-                    btn.innerHTML = `${value}<br><span style="font-size:12px; font-weight:normal;">${unit}</span>`;
+                    btn.innerHTML = `${value}<br><span style="font-size:11px; font-weight:normal;">${unit}</span>`;
                     btn.addEventListener("click", () => {
                         config.state[`selected${type.charAt(0).toUpperCase() + type.slice(1)}`] = value;
                         document.querySelectorAll(`#${config.elements[type]} .option-button`).forEach(el => el.classList.remove("active"));
@@ -800,8 +880,7 @@ let appInitialized = false;
                         updateTotal(config);
                     });
                     container.appendChild(btn);
-                });
-            }
+                });            }
 
             function getOptionCost(data, selectedValue) {
                 if(!data || !data.values) return 0;
@@ -839,12 +918,18 @@ let appInitialized = false;
                 const bonusTextElem = document.getElementById(bonusTextId);
 
                 if (total >= 100) {
-                    const template = translations[currentLang]?.bonus_text_template || '';
+                    // ЛОГИКА ВЫБОРА ТЕКСТА ПО ТАРИФУ
+                    let template = '';
+                    if (config === config1) {
+                        template = translations[currentLang]?.bonus_life1 || '';
+                    } else if (config === config2) {
+                        template = translations[currentLang]?.bonus_life2 || '';
+                    }
+                    
                     bonusTextElem.innerText = template.replace('{gb}', config.state.selectedInternet);
                     bonusContainer.style.display = 'block';
                 } else {
-                    bonusContainer.style.display = 'none';
-                }
+                    bonusContainer.style.display = 'none';                }
             }
 
             function initializeSliders() {
@@ -893,7 +978,6 @@ let appInitialized = false;
                     document.querySelectorAll(`#${config2.elements[type]} .option-button`).forEach((btn, i) => btn.classList.toggle('active', i === index));
                 });
             }
-
             function toggleLife2View() {
                 const gridView = document.getElementById('grid-view-life2');
                 const sliderView = document.getElementById('slider-view-life2');
@@ -943,8 +1027,7 @@ let appInitialized = false;
                                 ${item.price || 0} ${translations[currentLang].currency} / ${item.minutes || 0} ${translations[currentLang].min_unit} / ${item.gigabytes || 0} ${translations[currentLang].gb_unit} / ${item.sms || 0} ${translations[currentLang].sms_unit}
                             </div>
                         </div>
-                        <div class="history-actions">
-                            <button class="btn-history btn-load" data-id="${item.id}">${translations[currentLang].personal_history_load}</button>
+                        <div class="history-actions">                            <button class="btn-history btn-load" data-id="${item.id}">${translations[currentLang].personal_history_load}</button>
                             <button class="btn-history btn-delete" data-id="${item.id}">${translations[currentLang].personal_history_delete}</button>
                         </div>`;
                     historyList.appendChild(li);
@@ -993,8 +1076,7 @@ let appInitialized = false;
                     document.querySelectorAll('.ai-tab').forEach(t => t.classList.remove('active'));
                     e.target.classList.add('active');
                     currentAIFilter = e.target.dataset.filter;
-                    if (lastAITarget !== null) {
-                        executeAISearch(lastAITarget);
+                    if (lastAITarget !== null) {                        executeAISearch(lastAITarget);
                     }
                 });
             });
@@ -1004,6 +1086,13 @@ let appInitialized = false;
                 if(isNaN(target)) return showToast("Укажите сумму", true);
                 lastAITarget = target;
                 executeAISearch(target);
+            });
+
+            // Поиск по Enter
+            document.getElementById('ai-budget').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('ai-search-btn').click();
+                }
             });
 
             function executeAISearch(target) {
@@ -1036,8 +1125,7 @@ let appInitialized = false;
 
                     const uniqueCandidates = [];
                     const seen = new Set();
-                    for (const c of candidates) {
-                        const uid = `${c.typeId}-${c.min}-${c.sms}-${c.int}-${c.price}`;
+                    for (const c of candidates) {                        const uid = `${c.typeId}-${c.min}-${c.sms}-${c.int}-${c.price}`;
                         if (!seen.has(uid)) {
                             seen.add(uid);
                             uniqueCandidates.push(c);
@@ -1086,8 +1174,7 @@ let appInitialized = false;
                     // 4. Идеальный (Баланс минут, ГБ и СМС)
                     let tIdeal = extractBest((a,b) => {
                         let scoreA = (a.min >= 50 ? 1 : 0) + (a.sms > 0 ? 1 : 0) + (a.int >= 20 ? 1 : 0);
-                        let scoreB = (b.min >= 50 ? 1 : 0) + (b.sms > 0 ? 1 : 0) + (b.int >= 20 ? 1 : 0);
-                        if (scoreA !== scoreB) return scoreB - scoreA;
+                        let scoreB = (b.min >= 50 ? 1 : 0) + (b.sms > 0 ? 1 : 0) + (b.int >= 20 ? 1 : 0);                        if (scoreA !== scoreB) return scoreB - scoreA;
                         return Math.abs(a.price - target) - Math.abs(b.price - target);
                     });
                     if (tIdeal) {
@@ -1136,8 +1223,7 @@ let appInitialized = false;
                                     ${t.min} минут на все сети
                                 </li>
                                 <li class="ai-feature-item">
-                                    <div class="ai-feature-icon">${netIcon}</div> 
-                                    ${gbDisplay}
+                                    <div class="ai-feature-icon">${netIcon}</div>                                     ${gbDisplay}
                                 </li>
                                 <li class="ai-feature-item">
                                     <div class="ai-feature-icon">${smsIcon}</div> 
@@ -1186,8 +1272,7 @@ let appInitialized = false;
 
             window.copyAITariff = function(strObj) {
                 const t = JSON.parse(decodeURIComponent(strObj));
-                let nightTxt = currentLang === 'tj' ? " ва интернети шабона дорад, ки аз 00:00 то 6:59 интернети бемаҳдудро пешниҳод мекунад." : " и включает безлимитный ночной интернет с 00:00 до 6:59.";
-                let tariffName = t.typeId === 'life1' ? "Биё! бисоз Life" : "Биё! бисоз Life 2.0";
+                let nightTxt = currentLang === 'tj' ? " ва интернети шабона дорад, ки аз 00:00 то 6:59 интернети бемаҳдудро пешниҳод мекунад." : " и включает безлимитный ночной интернет с 00:00 до 6:59.";                let tariffName = t.typeId === 'life1' ? "Биё! бисоз Life" : "Биё! бисоз Life 2.0";
 
                 let bonusTxt = "";
                 if (t.price >= 100 && t.int > 0) {
@@ -1195,7 +1280,7 @@ let appInitialized = false;
                 }
 
                 let textToCopy = currentLang === 'tj' 
-                    ? `Тарофаи "${tariffName}" бо нархи ${t.price} сомонӣ💸, дар худ ${t.min} дақиқа ба дигар шабакаҳои ҶТ📞, ${t.int} ГБ🌐${bonusTxt}, ${t.sms} СМС✉️${nightTxt}`
+                    ? `Тарофаи "${tariffName}" бо нархи ${t.price} сомонӣ💸, дар худ ${t.min} дақиқа ба дигар шабакаҳои ҶТ, ${t.int} ГБ🌐${bonusTxt}, ${t.sms} СМС✉️${nightTxt}`
                     : `Тариф "${tariffName}" за ${t.price} сомони💸, включает ${t.min} минут по РТ📞, ${t.int} ГБ🌐${bonusTxt}, ${t.sms} СМС✉️${nightTxt}`;
                 
                 navigator.clipboard.writeText(textToCopy).then(() => showToast("copied_toast"));
@@ -1236,8 +1321,7 @@ let appInitialized = false;
                 if (Math.abs(dx) > 5 || Math.abs(dy) > 5) isMoved = true;
 
                 let nx = initialX + dx, ny = initialY + dy;
-                nx = Math.max(10, Math.min(nx, window.innerWidth - 70));
-                ny = Math.max(10, Math.min(ny, window.innerHeight - 70));
+                nx = Math.max(10, Math.min(nx, window.innerWidth - 70));                ny = Math.max(10, Math.min(ny, window.innerHeight - 70));
 
                 aiFab.style.left = nx + 'px'; aiFab.style.top = ny + 'px';
             }
@@ -1257,10 +1341,12 @@ let appInitialized = false;
             setLanguage(savedLang);
 
             document.getElementById('view-toggle-btn').addEventListener('click', toggleLife2View);
-            document.getElementById('copy-button1').addEventListener('click', () => copyText('footer-text-container1', 'copied_toast'));
-            document.getElementById('copy-button2').addEventListener('click', () => copyText('footer-text-container2', 'copied_toast'));
-            document.getElementById('copy-bonus-button1').addEventListener('click', () => copyText('bonus-text1', 'copied_toast'));
-            document.getElementById('copy-bonus-button2').addEventListener('click', () => copyText('bonus-text2', 'copied_toast'));
+            
+            // === ОБНОВЛЕННЫЕ СОБЫТИЯ КОПИРОВАНИЯ (КЛИК ПО КОНТЕЙНЕРУ) ===
+            document.getElementById('copy-area-1').addEventListener('click', () => copyText('footer-text-container1', 'copied_toast'));
+            document.getElementById('copy-area-2').addEventListener('click', () => copyText('footer-text-container2', 'copied_toast'));
+            document.getElementById('copy-bonus-area-1').addEventListener('click', () => copyText('bonus-text1', 'copied_toast'));
+            document.getElementById('copy-bonus-area-2').addEventListener('click', () => copyText('bonus-text2', 'copied_toast'));
 
             document.querySelectorAll('#personal .input-group input').forEach(input => input.addEventListener('input', updatePersonalCard));
             document.getElementById('copyAndSaveBtn').addEventListener('click', () => {
@@ -1284,8 +1370,7 @@ let appInitialized = false;
                 if (e.target.classList.contains('btn-load')) {
                     const itemToLoad = personalHistory.find(item => item.id === id);
                     if (itemToLoad) {
-                        setPersonalInputs(itemToLoad);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        setPersonalInputs(itemToLoad);                        window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 }
                 if (e.target.classList.contains('btn-delete')) {
@@ -1314,6 +1399,15 @@ let appInitialized = false;
                 }
             });
 
+            // Горячие клавиши для смены языка (Win/Cmd + Space)
+            document.addEventListener('keydown', (event) => {
+                if ((event.metaKey || event.ctrlKey) && event.code === 'Space') {
+                    event.preventDefault(); // Предотвращаем стандартное поведение
+                    const newLang = currentLang === 'tj' ? 'ru' : 'tj';
+                    setLanguage(newLang);
+                }
+            });
+
             loadPersonalHistory();
             renderPersonalHistory();
             updatePersonalCard();
@@ -1325,8 +1419,7 @@ let appInitialized = false;
             for(let registration of registrations) {
                 registration.unregister();
             }
-        });
-    }
+        });    }
     </script>
 </body>
 </html>

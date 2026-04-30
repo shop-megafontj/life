@@ -592,7 +592,7 @@ body.dark .ai-unlim-text { color: #aaa; }
         let config1 = {};
         let config2 = {};
         let currentUserRole = null; 
-        const LOGOUT_TIME_MS = 12 * 60 * 60 * 1000; // 12 hours
+      //  const LOGOUT_TIME_MS = 12 * 60 * 60 * 1000; // 12 hours
 
 // ==========================================
         // 1. АНАЛИЗАТОР УСТРОЙСТВА (ПРОДВИНУТЫЙ ТРЕКЕР)
@@ -1276,11 +1276,11 @@ let appInitialized = false;
 
                 let bonusTxt = "";
                 if (t.price >= 100 && t.int > 0) {
-                    bonusTxt = ` 🎁 +${t.int} ГБ`; // Добавляем бонусный текст прямо к скопированному тексту
+                    bonusTxt = ` +${t.int} ГБ 🎁`; // Добавляем бонусный текст прямо к скопированному тексту
                 }
 
                 let textToCopy = currentLang === 'tj' 
-                    ? `Тарофаи "${tariffName}" бо нархи ${t.price} сомонӣ💸, дар худ ${t.min} дақиқа ба дигар шабакаҳои ҶТ, ${t.int} ГБ🌐${bonusTxt}, ${t.sms} СМС✉️${nightTxt}`
+                    ? `Тарофаи "${tariffName}" бо нархи ${t.price} сомонӣ💸, дар худ ${t.min} дақиқа ба дигар шабакаҳои ҶТ, ${t.int} ГБ🌐 + ${bonusTxt}, ${t.sms} СМС✉️${nightTxt}`
                     : `Тариф "${tariffName}" за ${t.price} сомони💸, включает ${t.min} минут по РТ📞, ${t.int} ГБ🌐${bonusTxt}, ${t.sms} СМС✉️${nightTxt}`;
                 
                 navigator.clipboard.writeText(textToCopy).then(() => showToast("copied_toast"));

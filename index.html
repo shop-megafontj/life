@@ -1274,10 +1274,13 @@ let appInitialized = false;
                 const t = JSON.parse(decodeURIComponent(strObj));
                 let nightTxt = currentLang === 'tj' ? " ва интернети шабона дорад, ки аз 00:00 то 6:59 интернети бемаҳдудро пешниҳод мекунад." : " и включает безлимитный ночной интернет с 00:00 до 6:59.";               
                 let tariffName = t.typeId === 'life1' ? "Биё! бисоз Life" : "Биё! бисоз Life 2.0";
-                let iviOilatv = t.typeId === 'life2' && currentLang === 'tj' ? "Инчунин хизматрасониҳои Oila TV ва IVI-кинотеатр ройгон пешниҳод мешаванд." : "Также бесплатно предоставляются сервисы Oila TV и IVI.";
+                let iviOilatv = currentLang === 'tj' ? "Инчунин хизматрасониҳои Oila TV ва IVI-кинотеатр ройгон пешниҳод мешаванд." : "Также бесплатно предоставляются сервисы Oila TV и IVI.";
                 let bonusTxt = "";
                 if (t.price >= 100 && t.int > 0) {
                     bonusTxt = ` +${t.int} ГБ 🎁`; // Добавляем бонусный текст прямо к скопированному тексту
+                }
+                if (t.typeId === 'life2') {
+                    return iviOilatv
                 }
 
                 let textToCopy = currentLang === 'tj' 

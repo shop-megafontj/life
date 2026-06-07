@@ -9,124 +9,230 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Firebase App (the core Firebase SDK) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <!-- Firebase Auth -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <!-- Firebase Realtime Database -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
-        :root {
-            --primary-megafon: #00B956;
-            --primary-megafon-dark: #009645;
-        }
-        /* Скрытие скроллбара, но сохранение прокрутки */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        /* Плавное открытие аккордеона (поповера) */
+        /* Скрытие скроллбара */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Плавное открытие шаблонов */
         .template-body {
             transition: all 0.3s ease-in-out;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
+            max-height: 0; opacity: 0; overflow: hidden;
         }
         .template-body.expanded {
-            max-height: 1200px; /* С запасом для длинных текстов */
-            opacity: 1;
-            padding-top: 1rem;
-            padding-bottom: 1rem;
+            max-height: 1200px; opacity: 1; padding-top: 1rem; padding-bottom: 1rem;
         }
+        
         /* Анимация загрузки */
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: .5; }
         }
-        .animate-pulse-fast {
-            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        .animate-pulse-fast { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+        /* === AI PANEL STYLES === */
+        .ai-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 40; opacity: 0; visibility: hidden; transition: 0.3s;
         }
+        .ai-backdrop.show { opacity: 1; visibility: visible; }
+            
+        .ai-panel {
+            position: fixed; top: 0; right: -100%; width: 100%; max-width: 420px; height: 100%;
+            background: #f4f9f6; z-index: 50; box-shadow: -4px 0 25px rgba(0,0,0,0.15);
+            transition: right 0.3s ease-in-out; display: flex; flex-direction: column;
+        }
+        .ai-panel.open { right: 0; }
+
+        .ai-fab {
+            position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px;
+            background: linear-gradient(135deg, #00B956, #008833);
+            color: white; border-radius: 50%; border: none;
+            box-shadow: 0 6px 16px rgba(0, 185, 86, 0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; cursor: pointer; z-index: 30; transition: transform 0.2s;
+        }
+        .ai-fab:hover { transform: scale(1.05); }
+        .ai-fab:active { transform: scale(0.95); }
+        .ai-badge {
+            position: absolute; top: 0; right: 0; background: #ff3b30; font-size: 10px; font-weight: bold;
+            padding: 2px 6px; border-radius: 10px; border: 2px solid #fff;
+        }
+        
+        .ai-card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); margin-bottom: 16px;}
+        .ai-tag { display: inline-block; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 8px; margin-bottom: 8px; text-transform: uppercase; color: #fff; }
+        .tag-blue { background: #2d98da; }
+        .tag-green { background: #00B956; }
+        .tag-purple { background: #7A00B9; }
+        
+        #resizer { transition: background-color 0.2s; }
+        #resizer:hover, #resizer.active { background-color: #00B956; }
     </style>
 </head>
 <body class="h-screen w-full bg-gray-50 overflow-hidden font-sans text-gray-800 flex">
 
     <!-- Левая панель: База шаблонов -->
-    <div class="w-1/3 min-w-[320px] max-w-[450px] bg-white border-r border-gray-200 flex flex-col shadow-xl z-10 h-full">
+    <div id="sidebar" class="flex flex-col bg-white border-r border-gray-200 shadow-xl z-10 h-full relative flex-shrink-0" style="width: 380px;">
         
         <!-- Шапка панели -->
-        <div class="p-5 bg-[#00B956] text-white shadow-md z-20">
-            <div class="flex items-center gap-3 mb-5">
-                <!-- Иконка МегаФон / Чата -->
+        <div class="p-5 bg-[#00B956] text-white z-20">
+            <div class="flex items-center gap-3 mb-4">
                 <div class="p-2 bg-white/20 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-wide leading-tight">Шаблоны</h1>
-                    <p class="text-xs text-white/80" id="db-status">Подключение к базе...</p>
+                    <h1 class="text-lg font-bold tracking-wide leading-tight">Шаблоны</h1>
+                    <p class="text-[11px] text-white/80" id="db-status">Подключение к базе...</p>
                 </div>
             </div>
             
             <!-- Поля поиска -->
-            <div class="flex flex-col gap-3">
-                <!-- Поиск RU -->
+            <div class="flex flex-col gap-2">
                 <div class="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-                    <input type="text" id="search-ru" placeholder="Поиск на русском..." class="w-full pl-10 pr-3 py-2.5 rounded-lg border-0 text-sm text-gray-800 bg-white/95 focus:bg-white focus:ring-2 focus:ring-white/50 focus:outline-none transition-all shadow-inner placeholder-gray-400 font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                    <input type="text" id="search-ru" placeholder="Поиск на русском..." class="w-full pl-9 pr-3 py-2 rounded-md border-0 text-[13px] text-gray-800 bg-white focus:ring-2 focus:ring-white/50 focus:outline-none shadow-sm placeholder-gray-400 font-medium">
                 </div>
-                <!-- Поиск TJ -->
                 <div class="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-                    <input type="text" id="search-tj" placeholder="Ҷустуҷӯ ба тоҷикӣ..." class="w-full pl-10 pr-3 py-2.5 rounded-lg border-0 text-sm text-gray-800 bg-white/95 focus:bg-white focus:ring-2 focus:ring-white/50 focus:outline-none transition-all shadow-inner placeholder-gray-400 font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                    <input type="text" id="search-tj" placeholder="Ҷустуҷӯ ба тоҷикӣ..." class="w-full pl-9 pr-3 py-2 rounded-md border-0 text-[13px] text-gray-800 bg-white focus:ring-2 focus:ring-white/50 focus:outline-none shadow-sm placeholder-gray-400 font-medium">
                 </div>
             </div>
         </div>
 
         <!-- Список шаблонов -->
-        <div class="flex-1 overflow-y-auto p-4 bg-gray-50/50 flex flex-col no-scrollbar">
-            <div id="templates-count" class="mb-3 text-xs text-gray-500 font-semibold uppercase tracking-wider pl-1">
+        <div class="flex-1 overflow-y-auto p-4 bg-[#f8f9fa] flex flex-col no-scrollbar">
+            <div id="templates-count" class="mb-3 text-[11px] text-gray-500 font-semibold uppercase tracking-wider pl-1">
                 Загрузка данных...
             </div>
             
-            <div id="templates-container" class="flex flex-col gap-3">
-                <!-- Скелетон загрузки -->
+            <div id="templates-container" class="flex flex-col gap-2.5">
+                <!-- Скелетон -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 animate-pulse-fast">
                     <div class="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
                     <div class="flex gap-2"><div class="h-5 bg-gray-100 rounded w-16"></div><div class="h-5 bg-gray-100 rounded w-20"></div></div>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 animate-pulse-fast">
-                    <div class="h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
-                    <div class="flex gap-2"><div class="h-5 bg-gray-100 rounded w-24"></div></div>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- Правая панель: Рабочая среда оператора (iframe) -->
-    <div class="flex-1 bg-[#f4f7f6] flex flex-col relative h-full">
-        <!-- Фон-заглушка на время загрузки iframe -->
+    <!-- Ползунок для изменения ширины (Resizer) -->
+    <div id="resizer" class="w-1.5 bg-gray-200 cursor-col-resize z-20 flex-shrink-0" title="Потяните для изменения ширины"></div>
+
+    <!-- Правая панель: Iframe -->
+    <div id="main-content" class="flex-1 bg-[#f4f7f6] flex flex-col relative h-full min-w-[300px]">
+        
+        <!-- Невидимый блок поверх iframe во время ресайза, чтобы не терять мышь -->
+        <div id="iframe-blocker" class="absolute inset-0 z-20 hidden cursor-col-resize"></div>
+
         <div class="absolute inset-0 flex flex-col items-center justify-center z-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00B956" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-4 opacity-20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00B956" stroke-width="1.5" class="mb-4 opacity-20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
             <p class="text-gray-400 font-medium">Платформа оператора загружается...</p>
         </div>
         
-        <!-- Iframe для загрузки корпоративного сайта -->
+        <!-- Сайт оператора -->
         <iframe src="https://operator.megafon.tj" class="w-full h-full border-0 z-10 bg-transparent relative" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
     </div>
 
+    <!-- Плавающая кнопка AI -->
+    <button class="ai-fab" id="ai-fab" title="ИИ Подбор тарифа">
+        ✨<span class="ai-badge">AI</span>
+    </button>
+
+    <!-- Панель AI Подбора -->
+    <div class="ai-backdrop" id="ai-backdrop"></div>
+    <div class="ai-panel" id="ai-panel">
+        <div class="p-5 border-b border-gray-200 flex justify-between items-center bg-white">
+            <h2 class="text-lg font-bold text-[#00B956] flex items-center gap-2">✨ AI Подбор тарифа</h2>
+            <button class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold" id="ai-close">&times;</button>
+        </div>
+        
+        <div class="p-5 border-b border-gray-200 bg-white">
+            <label class="block text-[13px] font-bold text-gray-700 mb-2">Желаемый бюджет (сомони):</label>
+            <div class="flex gap-2 mb-2">
+                <input type="number" id="ai-budget" placeholder="Например: 100" class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold focus:border-[#00B956] focus:ring-1 focus:ring-[#00B956] outline-none">
+                <button id="ai-search-btn" class="px-5 bg-[#00B956] text-white font-bold rounded-lg hover:bg-[#009645] transition-colors shadow-sm">Искать</button>
+            </div>
+            <p class="text-[11px] text-gray-500">Ищем лучшие комбинации в диапазоне ±5 сомони</p>
+            
+            <div class="flex bg-gray-100 rounded-lg p-1 mt-4" id="ai-filter-tabs">
+                <button class="flex-1 py-2 text-[11px] font-bold rounded-md bg-white shadow-sm text-gray-800" data-filter="all">Все тарифы</button>
+                <button class="flex-1 py-2 text-[11px] font-bold rounded-md text-gray-500 hover:text-gray-800 transition-colors" data-filter="life1">Биё! бисоз Life</button>
+                <button class="flex-1 py-2 text-[11px] font-bold rounded-md text-gray-500 hover:text-gray-800 transition-colors" data-filter="life2">Life 2.0</button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-5" id="ai-results">
+            <div class="text-center text-gray-400 mt-10 text-[13px] font-medium">
+                Введите сумму, и искусственный интеллект подберет лучшие комбинации.
+            </div>
+        </div>
+    </div>
+
+    <!-- Всплывающее уведомление -->
+    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg opacity-0 pointer-events-none transition-opacity z-50">
+        Текст скопирован!
+    </div>
+
     <script>
-        // Иконки
-        const icons = {
-            chevronDown: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>`,
-            chevronUp: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"></path></svg>`,
-            copy: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>`,
-            check: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+        // === КОНФИГУРАЦИИ ТАРИФОВ ДЛЯ AI ===
+        const config1 = {
+            basePrice: 49.57, maxTotal: 346.96,
+            internet: { values: [10,12,14,16,18,20,22,24,26,28,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120,125,130,135,140,145,150], prices: [0,2.97,2.97,2.98,2.97,2.97,2.98,2.97,2.98,2.97,2.97,6.94,6.94,6.94,6.94,6.94,6.94,6.94,6.94,6.94,6.94,6.93,6.94,6.94,6.94,6.94,6.94,6.94,6.94,6.94,6.94,6.94,6.94,6.94,6.94] },
+            minutes: { values: [50,75,100,125,150,175,200,225,250,275,300,325,350,375,400,425,450,475,500], prices: [0,4.95,4.96,4.95,4.96,4.96,4.95,4.96,4.96,4.95,4.96,4.96,4.95,4.96,4.96,4.95,4.96,4.96,4.95] },
+            sms: { values: [0,50,100,150,200,250,300], prices: [0,1.98,1.98,1.98,1.99,1.98,1.98] }
+        };
+        const config2 = {
+            basePrice: 65, maxTotal: 358.5,
+            internet: { values: [15,16,17,18,19,20,22,24,26,28,30,32,34,36,38,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120,125,130,135,140,145,150], prices: [0,1.5,1.5,1.5,1.5,1.5,3,3,3,3,3,3,3,3,3,3,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7] },
+            minutes: { values: [50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300,310,320,330,340,350,360,370,380,390,400,410,420,430,440,450,460,470,480,490,500], prices: [0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2] },
+            sms: { values: [0,25,50,75,100,125,150,175,200,225,250,275,300], prices: [0,1,1,1,1,1,1,1,1,1,1,1,1] }
         };
 
-        // Конфигурация Firebase из вашего файла
+        const icons = {
+            chevronDown: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>`,
+            chevronUp: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"></path></svg>`,
+            copy: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>`,
+            check: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-white"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+        };
+
+        // === ИЗМЕНЕНИЕ ШИРИНЫ САЙДБАРА (RESIZER) ===
+        const resizer = document.getElementById('resizer');
+        const sidebar = document.getElementById('sidebar');
+        const iframeBlocker = document.getElementById('iframe-blocker');
+
+        let isResizing = false;
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            iframeBlocker.style.display = 'block'; // Блокируем iframe
+            resizer.classList.add('active');
+            document.body.style.cursor = 'col-resize';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            let newWidth = e.clientX;
+            // Ограничители ширины
+            if (newWidth < 280) newWidth = 280;
+            if (newWidth > 600) newWidth = 600;
+            sidebar.style.width = `${newWidth}px`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                iframeBlocker.style.display = 'none';
+                resizer.classList.remove('active');
+                document.body.style.cursor = 'default';
+            }
+        });
+
+        // === FIREBASE И ШАБЛОНЫ ===
         const firebaseConfig = {
             apiKey: "AIzaSyDEDIJIx6gGqeLk20nJWSlTxd6tnhmSGy4",
             authDomain: "bisoz-682b8.firebaseapp.com",
@@ -134,256 +240,314 @@
             projectId: "bisoz-682b8",
             storageBucket: "bisoz-682b8.firebasestorage.app",
             messagingSenderId: "90545419911",
-            appId: "1:90545419911:web:217b288ff83fa1e204ea22",
-            measurementId: "G-WYNYL1RCX2"
+            appId: "1:90545419911:web:217b288ff83fa1e204ea22"
         };
 
-        // Инициализация Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // Состояние приложения
         let allTemplates = [];
         let expandedId = null;
         let searchRu = "";
         let searchTj = "";
 
-        // DOM элементы
         const container = document.getElementById('templates-container');
         const countLabel = document.getElementById('templates-count');
         const dbStatus = document.getElementById('db-status');
-        const searchRuInput = document.getElementById('search-ru');
-        const searchTjInput = document.getElementById('search-tj');
 
-        // Подключение к БД и авторизация
         const initApp = () => {
-            // Анонимная авторизация (чтобы обойти правила безопасности, если они есть, и не заставлять оператора логиниться дважды)
-            auth.signInAnonymously()
-                .then(() => {
-                    dbStatus.textContent = "Синхронизировано";
-                    dbStatus.classList.add('text-green-200');
-                    fetchTemplates();
-                })
-                .catch((error) => {
-                    // Если анонимный вход запрещен правилами, пробуем просто слушать базу 
-                    // (Возможно пользователь уже авторизован сессией)
-                    console.warn("Анонимный вход не удался:", error.message);
-                    fetchTemplates();
-                });
+            auth.signInAnonymously().then(() => {
+                dbStatus.textContent = "База подключена";
+                fetchTemplates();
+            }).catch((err) => {
+                fetchTemplates();
+            });
         };
 
-        // Получение шаблонов из Realtime Database
         const fetchTemplates = () => {
             db.ref('templates').on('value', (snapshot) => {
                 const data = snapshot.val();
                 allTemplates = [];
-                
                 if (data) {
                     for (const key in data) {
-                        const template = data[key];
-                        // Проверяем статус (показываем одобренные или если статуса нет)
-                        if (!template.status || template.status === 'approved') {
+                        const t = data[key];
+                        if (!t.status || t.status === 'approved') {
                             allTemplates.push({
-                                id: key,
-                                title: template.title || "Без названия",
-                                text_ru: template.text_ru || "",
-                                text_tj: template.text_tj || "",
-                                tags: template.tags || []
+                                id: key, title: t.title || "Без названия",
+                                text_ru: t.text_ru || "", text_tj: t.text_tj || "", tags: t.tags || []
                             });
                         }
                     }
                 }
-                
-                // Сортировка по алфавиту
                 allTemplates.sort((a, b) => a.title.localeCompare(b.title));
                 renderTemplates();
-                
-            }, (error) => {
-                console.error("Ошибка Firebase:", error);
-                dbStatus.textContent = "Ошибка подключения";
-                dbStatus.classList.remove('text-green-200');
-                dbStatus.classList.add('text-red-300');
-                container.innerHTML = `<div class="text-center p-4 text-red-500 bg-red-50 rounded-lg border border-red-100">Не удалось загрузить шаблоны: ${error.message}</div>`;
             });
         };
 
-        // Отрисовка шаблонов
         const renderTemplates = () => {
-            // Фильтрация
-            const filtered = allTemplates.filter(template => {
-                const sRu = searchRu.toLowerCase();
-                const sTj = searchTj.toLowerCase();
-                
-                const title = template.title.toLowerCase();
-                const tRu = template.text_ru.toLowerCase();
-                const tTj = template.text_tj.toLowerCase();
-                const tags = template.tags.join(" ").toLowerCase();
-
-                const matchRu = searchRu === '' || title.includes(sRu) || tRu.includes(sRu) || tags.includes(sRu);
-                const matchTj = searchTj === '' || title.includes(sTj) || tTj.includes(sTj) || tags.includes(sTj);
-
-                return matchRu && matchTj;
+            const filtered = allTemplates.filter(t => {
+                const sRu = searchRu.toLowerCase(), sTj = searchTj.toLowerCase();
+                const title = t.title.toLowerCase(), tRu = t.text_ru.toLowerCase(), tTj = t.text_tj.toLowerCase(), tags = t.tags.join(" ").toLowerCase();
+                return (searchRu === '' || title.includes(sRu) || tRu.includes(sRu) || tags.includes(sRu)) &&
+                       (searchTj === '' || title.includes(sTj) || tTj.includes(sTj) || tags.includes(sTj));
             });
 
-            countLabel.textContent = `Найдено шаблонов: ${filtered.length}`;
+            countLabel.textContent = `Доступно шаблонов: ${filtered.length}`;
             container.innerHTML = '';
 
             if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12 text-gray-400 flex flex-col items-center bg-white rounded-xl border border-gray-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3 opacity-40"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-                        <p class="font-medium">Шаблоны не найдены</p>
-                        <p class="text-xs mt-1">Попробуйте изменить запрос</p>
-                    </div>`;
+                container.innerHTML = `<div class="text-center py-8 text-gray-400 bg-white rounded-lg border border-gray-100">Ничего не найдено</div>`;
                 return;
             }
 
             filtered.forEach(template => {
                 const isExpanded = expandedId === template.id;
-                
-                // Рендер тегов
-                let tagsHtml = '';
-                if (template.tags && template.tags.length > 0) {
-                    tagsHtml = template.tags.map(tag => 
-                        `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#00B956]/10 text-[#009645] uppercase tracking-wide">${tag}</span>`
-                    ).join('');
-                }
+                let tagsHtml = template.tags.map(tag => `<span class="inline-block px-1.5 py-[2px] rounded text-[9px] font-bold bg-[#00B956]/10 text-[#009645] uppercase mt-1 mr-1">${tag}</span>`).join('');
 
                 const item = document.createElement('div');
-                item.className = `bg-white rounded-xl shadow-sm border transition-all duration-200 mb-3 ${isExpanded ? 'border-[#00B956] shadow-md' : 'border-gray-200 hover:border-[#00B956]/50'}`;
+                item.className = `bg-white rounded-xl shadow-sm border transition-all duration-200 ${isExpanded ? 'border-[#00B956] shadow-md' : 'border-gray-200 hover:border-[#00B956]/40'}`;
                 
                 item.innerHTML = `
-                    <!-- Заголовок (кнопка раскрытия) -->
-                    <div class="template-header p-4 flex justify-between items-center cursor-pointer select-none group" data-id="${template.id}">
-                        <div class="flex-1 min-w-0 pr-4">
-                            <h3 class="text-sm font-bold text-gray-800 truncate group-hover:text-[#00B956] transition-colors">${template.title}</h3>
-                            <div class="flex gap-1 mt-1.5 overflow-x-auto no-scrollbar pointer-events-none">
-                                ${tagsHtml}
-                            </div>
+                    <div class="template-header p-3.5 flex justify-between items-center cursor-pointer select-none group" data-id="${template.id}">
+                        <div class="flex-1 pr-3">
+                            <h3 class="text-[13px] font-bold text-gray-800 leading-snug group-hover:text-[#00B956]">${template.title}</h3>
+                            <div class="pointer-events-none">${tagsHtml}</div>
                         </div>
-                        <div class="text-gray-400 group-hover:text-[#00B956] transition-colors bg-gray-50 rounded-full p-1.5">
-                            ${isExpanded ? icons.chevronUp : icons.chevronDown}
-                        </div>
+                        <div class="text-gray-400 group-hover:text-[#00B956] bg-gray-50 rounded-full p-1.5">${isExpanded ? icons.chevronUp : icons.chevronDown}</div>
                     </div>
-                    
-                    <!-- Тело (Поповер/Аккордеон) -->
-                    <div class="template-body ${isExpanded ? 'expanded px-4 border-t border-gray-100' : 'px-4'}" style="${isExpanded ? '' : 'display: none;'}">
-                        
-                        <!-- Русский вариант -->
-                        <div class="mb-4 bg-gray-50 rounded-lg border border-gray-100 overflow-hidden">
-                            <div class="flex justify-between items-center bg-gray-100/50 px-3 py-2 border-b border-gray-100">
-                                <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Русский</span>
-                                <button class="copy-btn flex items-center gap-1.5 text-xs text-[#00B956] font-semibold px-2.5 py-1 rounded-md hover:bg-[#00B956] hover:text-white transition-all" data-lang="ru" data-id="${template.id}">
-                                    <span class="icon-slot">${icons.copy}</span>
-                                    <span class="text-slot">Копировать</span>
+                    <div class="template-body ${isExpanded ? 'expanded px-3 border-t border-gray-100' : 'px-3'}" style="${isExpanded ? '' : 'display: none;'}">
+                        <div class="mb-3 bg-gray-50 rounded-lg border border-gray-100 overflow-hidden">
+                            <div class="flex justify-between items-center bg-gray-100/50 px-2.5 py-1.5 border-b border-gray-100">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Русский</span>
+                                <button class="copy-btn flex items-center gap-1 text-[11px] text-[#00B956] font-bold px-2 py-1 rounded hover:bg-[#00B956] hover:text-white transition-all" data-lang="ru" data-id="${template.id}">
+                                    <span class="icon-slot">${icons.copy}</span> <span class="text-slot">Копировать</span>
                                 </button>
                             </div>
-                            <div class="p-3 text-[13px] text-gray-700 whitespace-pre-wrap leading-relaxed">${template.text_ru || '<span class="text-gray-400 italic">Нет текста</span>'}</div>
+                            <div class="p-2.5 text-[12px] text-gray-700 whitespace-pre-wrap leading-relaxed">${template.text_ru || 'Нет текста'}</div>
                         </div>
-
-                        <!-- Таджикский вариант -->
                         <div class="bg-gray-50 rounded-lg border border-gray-100 overflow-hidden">
-                            <div class="flex justify-between items-center bg-gray-100/50 px-3 py-2 border-b border-gray-100">
-                                <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Тоҷикӣ</span>
-                                <button class="copy-btn flex items-center gap-1.5 text-xs text-[#00B956] font-semibold px-2.5 py-1 rounded-md hover:bg-[#00B956] hover:text-white transition-all" data-lang="tj" data-id="${template.id}">
-                                    <span class="icon-slot">${icons.copy}</span>
-                                    <span class="text-slot">Нусхабардорӣ</span>
+                            <div class="flex justify-between items-center bg-gray-100/50 px-2.5 py-1.5 border-b border-gray-100">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Тоҷикӣ</span>
+                                <button class="copy-btn flex items-center gap-1 text-[11px] text-[#00B956] font-bold px-2 py-1 rounded hover:bg-[#00B956] hover:text-white transition-all" data-lang="tj" data-id="${template.id}">
+                                    <span class="icon-slot">${icons.copy}</span> <span class="text-slot">Нусхабардорӣ</span>
                                 </button>
                             </div>
-                            <div class="p-3 text-[13px] text-gray-700 whitespace-pre-wrap leading-relaxed">${template.text_tj || '<span class="text-gray-400 italic">Матн нест</span>'}</div>
+                            <div class="p-2.5 text-[12px] text-gray-700 whitespace-pre-wrap leading-relaxed">${template.text_tj || 'Матн нест'}</div>
                         </div>
-
                     </div>
                 `;
                 container.appendChild(item);
             });
         };
 
-        // Обработчик копирования текста (Используем execCommand для надежной работы внутри iframe/кроссдоменных ограничений)
-        const handleCopy = (button) => {
-            const templateId = button.dataset.id;
-            const lang = button.dataset.lang;
-            const template = allTemplates.find(t => t.id === templateId);
-            if (!template) return;
+        const showToast = (msg) => {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+        };
 
-            const text = lang === 'ru' ? template.text_ru : template.text_tj;
+        const handleCopy = (button, customText = null) => {
+            let textToCopy = customText;
             
-            // Создаем временный элемент для копирования
+            if (!customText) {
+                const templateId = button.dataset.id;
+                const lang = button.dataset.lang;
+                const template = allTemplates.find(t => t.id === templateId);
+                if (!template) return;
+                textToCopy = lang === 'ru' ? template.text_ru : template.text_tj;
+            }
+
             const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.top = "-9999px";
+            textArea.value = textToCopy;
+            textArea.style.position = "fixed"; textArea.style.top = "-9999px";
             document.body.appendChild(textArea);
             textArea.select();
             
             try {
                 document.execCommand('copy');
-                
-                // Визуальная обратная связь
-                const iconSlot = button.querySelector('.icon-slot');
-                const textSlot = button.querySelector('.text-slot');
-                
-                const originalHtml = iconSlot.innerHTML;
-                const originalText = textSlot.innerText;
-
-                // Стилизуем кнопку как успешную
-                button.classList.add('bg-[#00B956]', 'text-white');
-                iconSlot.innerHTML = icons.check;
-                textSlot.innerText = lang === 'ru' ? 'Скопировано!' : 'Нусхабардорӣ шуд!';
-                
-                setTimeout(() => {
-                    button.classList.remove('bg-[#00B956]', 'text-white');
-                    iconSlot.innerHTML = originalHtml;
-                    textSlot.innerText = originalText;
-                }, 1500);
+                if (button) {
+                    const iconSlot = button.querySelector('.icon-slot');
+                    const textSlot = button.querySelector('.text-slot');
+                    const originalHtml = iconSlot.innerHTML;
+                    const originalText = textSlot.innerText;
+                    button.classList.add('bg-[#00B956]', 'text-white');
+                    iconSlot.innerHTML = icons.check;
+                    textSlot.innerText = 'Успешно!';
+                    setTimeout(() => {
+                        button.classList.remove('bg-[#00B956]', 'text-white');
+                        iconSlot.innerHTML = originalHtml;
+                        textSlot.innerText = originalText;
+                    }, 1500);
+                }
+                showToast("Текст скопирован!");
             } catch (err) {
-                console.error('Ошибка копирования', err);
-                alert("Не удалось скопировать текст. Ваш браузер блокирует действие.");
+                alert("Ошибка копирования");
             } finally {
                 document.body.removeChild(textArea);
             }
         };
 
-        // === Привязка событий ===
-        
-        // Делегирование событий клика в контейнере
         container.addEventListener('click', (e) => {
-            // Обработка раскрытия аккордеона
             const header = e.target.closest('.template-header');
             if (header) {
-                const id = header.dataset.id;
-                expandedId = expandedId === id ? null : id;
+                expandedId = expandedId === header.dataset.id ? null : header.dataset.id;
                 renderTemplates();
                 return;
             }
-
-            // Обработка кнопки копирования
             const copyBtn = e.target.closest('.copy-btn');
-            if (copyBtn) {
-                handleCopy(copyBtn);
-            }
+            if (copyBtn) handleCopy(copyBtn);
         });
 
-        // Поиск
-        searchRuInput.addEventListener('input', (e) => {
-            searchRu = e.target.value;
-            renderTemplates();
+        document.getElementById('search-ru').addEventListener('input', (e) => { searchRu = e.target.value; renderTemplates(); });
+        document.getElementById('search-tj').addEventListener('input', (e) => { searchTj = e.target.value; renderTemplates(); });
+
+        // === AI ПАНЕЛЬ И ПОДБОР ТАРИФОВ ===
+        const aiFab = document.getElementById('ai-fab');
+        const aiPanel = document.getElementById('ai-panel');
+        const aiBackdrop = document.getElementById('ai-backdrop');
+        const aiSearchBtn = document.getElementById('ai-search-btn');
+        const aiResults = document.getElementById('ai-results');
+        let currentAIFilter = 'all';
+
+        const openAIPanel = () => { aiPanel.classList.add('open'); aiBackdrop.classList.add('show'); };
+        const closeAIPanel = () => { aiPanel.classList.remove('open'); aiBackdrop.classList.remove('show'); };
+
+        aiFab.addEventListener('click', openAIPanel);
+        document.getElementById('ai-close').addEventListener('click', closeAIPanel);
+        aiBackdrop.addEventListener('click', closeAIPanel);
+
+        document.getElementById('ai-filter-tabs').addEventListener('click', (e) => {
+            if(e.target.tagName !== 'BUTTON') return;
+            const buttons = document.getElementById('ai-filter-tabs').querySelectorAll('button');
+            buttons.forEach(b => { b.className = "flex-1 py-2 text-[11px] font-bold rounded-md text-gray-500 hover:text-gray-800 transition-colors"; });
+            e.target.className = "flex-1 py-2 text-[11px] font-bold rounded-md bg-white shadow-sm text-gray-800";
+            currentAIFilter = e.target.dataset.filter;
+            if(document.getElementById('ai-budget').value) aiSearchBtn.click();
         });
 
-        searchTjInput.addEventListener('input', (e) => {
-            searchTj = e.target.value;
-            renderTemplates();
+        document.getElementById('ai-budget').addEventListener('keypress', (e) => { if(e.key === 'Enter') aiSearchBtn.click(); });
+
+        const getOptionCost = (data, selectedValue) => {
+            const index = data.values.indexOf(selectedValue);
+            if (index < 1) return 0;
+            return data.prices.slice(1, index + 1).reduce((acc, price) => acc + price, 0);
+        };
+
+        const generateCombos = (cfg, typeName, typeId) => {
+            let all = [];
+            cfg.minutes.values.forEach(min => {
+                cfg.sms.values.forEach(sms => {
+                    cfg.internet.values.forEach(int => {
+                        let rawCost = cfg.basePrice + getOptionCost(cfg.minutes, min) + getOptionCost(cfg.sms, sms) + getOptionCost(cfg.internet, int);
+                        let finalPrice = rawCost > cfg.maxTotal ? cfg.maxTotal : rawCost;
+                        all.push({ min, sms, int, price: parseFloat(finalPrice.toFixed(2)), rawCost: parseFloat(rawCost.toFixed(2)), typeName, typeId });
+                    });
+                });
+            });
+            return all;
+        };
+
+        aiSearchBtn.addEventListener('click', () => {
+            const target = parseFloat(document.getElementById('ai-budget').value);
+            if(isNaN(target)) { showToast("Укажите сумму"); return; }
+            
+            aiResults.innerHTML = '<div class="text-center text-[#00B956] font-bold mt-10">Анализируем комбинации... ⏳</div>';
+
+            setTimeout(() => {
+                let c1 = generateCombos(config1, "Биё! бисоз Life", "life1");
+                let c2 = generateCombos(config2, "Life 2.0", "life2");
+                let allT = [];
+
+                if (currentAIFilter === 'all') allT = [...c1, ...c2];
+                else if (currentAIFilter === 'life1') allT = [...c1];
+                else if (currentAIFilter === 'life2') allT = [...c2];
+
+                // Диапазон ±5 сомони
+                let candidates = allT.filter(t => t.price >= target - 5 && t.price <= target + 5);
+                candidates = candidates.filter(t => t.price === (t.typeId === 'life1' ? config1.maxTotal : config2.maxTotal) ? t.rawCost >= t.price : true);
+
+                if(candidates.length === 0) {
+                    aiResults.innerHTML = `<div class="text-center text-gray-500 mt-10 text-sm">В диапазоне ${target-5} - ${target+5} сомони тарифов не найдено.</div>`;
+                    return;
+                }
+
+                // Выбираем лучшие 4
+                let pool = [...candidates];
+                const extractBest = (sortFn) => { pool.sort(sortFn); return pool.shift(); };
+
+                let selectedCards = [];
+                
+                let tInternet = extractBest((a,b) => b.int - a.int || Math.abs(a.price - target) - Math.abs(b.price - target));
+                if (tInternet) { tInternet.badge = "ИНТЕРНЕТ"; tInternet.cls = "tag-purple"; tInternet.title = "Максимум ГБ"; selectedCards.push(tInternet); }
+
+                let tPrice = extractBest((a,b) => Math.abs(a.price - target) - Math.abs(b.price - target) || (b.int*2 + b.min) - (a.int*2 + a.min));
+                if (tPrice) { tPrice.badge = "ВЫГОДНО"; tPrice.cls = "tag-blue"; tPrice.title = "Лучшая цена"; selectedCards.push(tPrice); }
+
+                let tTalk = extractBest((a,b) => b.min - a.min || Math.abs(a.price - target) - Math.abs(b.price - target));
+                if (tTalk) { tTalk.badge = "ОБЩЕНИЕ"; tTalk.cls = "tag-green"; tTalk.title = "Для звонков"; selectedCards.push(tTalk); }
+
+                let renderedCards = '';
+                selectedCards.forEach(t => {
+                    let gbDisplay = `${t.int} ГБ`;
+                    if (t.price >= 100 && t.int > 0) gbDisplay = `${t.int} ГБ <span class="text-[#7A00B9] font-black text-[11px] ml-1">+${t.int} ГБ🎁</span>`;
+
+                    let unlimText = t.typeId === 'life2' ? "Безлимит в сети, ночь (00:00-06:59), IVI, Oila TV" : "Безлимит в сети, ночной интернет (00:00-06:59)";
+                    
+                    let textRu = `Тариф "${t.typeName}" за ${t.price} сомони💸 включает ${t.min} мин по РТ📞, ${t.int} ГБ🌐${t.price>=100?' +'+t.int+'ГБ🎁':''}, ${t.sms} СМС✉️. ${unlimText}.`;
+                    let textTj = `Тарофаи "${t.typeName}" бо нархи ${t.price} сомонӣ💸 дар худ ${t.min} дақиқа ҶТ📞, ${t.int} ГБ🌐${t.price>=100?' +'+t.int+'ГБ🎁':''}, ${t.sms} СМС✉️ дорад. Инчунин ${t.typeId==='life2'?'шабона (00:00-06:59) бемаҳдуд, IVI ва Oila TV':'интернети шабона (00:00-06:59)'} ройгон аст.`;
+                    
+                    const strObj = encodeURIComponent(JSON.stringify({ru: textRu, tj: textTj}));
+
+                    renderedCards += `
+                    <div class="ai-card">
+                        <div class="ai-tag ${t.cls}">${t.badge}</div>
+                        <div class="text-base font-black text-gray-800 mb-1">${t.title} <span class="text-[11px] text-gray-400 font-semibold uppercase">(${t.typeName})</span></div>
+                        
+                        <div class="flex gap-4 my-3 text-sm font-bold text-gray-700">
+                            <div class="flex items-center gap-1.5"><svg class="w-4 h-4 text-[#00B956]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path><path d="M2 12h20"></path></svg> ${gbDisplay}</div>
+                            <div class="flex items-center gap-1.5"><svg class="w-4 h-4 text-[#00B956]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> ${t.min}</div>
+                        </div>
+
+                        <div class="text-[11px] text-gray-500 font-semibold bg-gray-50 p-2 rounded-md mb-4">${unlimText}</div>
+
+                        <div class="flex justify-between items-end">
+                            <div class="text-2xl font-black text-gray-800">${t.price} <span class="text-[10px] text-gray-400 font-bold">TJS</span></div>
+                            <div class="flex gap-1.5">
+                                <button onclick="window.copyGeneratedAITariff('${strObj}', 'ru', this)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold px-3 py-1.5 rounded transition">Copy RU</button>
+                                <button onclick="window.copyGeneratedAITariff('${strObj}', 'tj', this)" class="bg-[#00B956] hover:bg-[#009645] text-white text-[11px] font-bold px-3 py-1.5 rounded transition">Copy TJ</button>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+
+                aiResults.innerHTML = renderedCards;
+            }, 400);
         });
 
-        // Старт
+        // Функция для копирования из AI Ассистента
+        window.copyGeneratedAITariff = (encodedTexts, lang, btn) => {
+            const texts = JSON.parse(decodeURIComponent(encodedTexts));
+            handleCopy(null, texts[lang]);
+            
+            // Визуальный фидбек для кнопок AI
+            const originalText = btn.innerText;
+            btn.innerText = "✔";
+            btn.classList.add("bg-[#009645]", "text-white");
+            setTimeout(() => { 
+                btn.innerText = originalText; 
+                btn.classList.remove("bg-[#009645]");
+                if(lang === 'ru') btn.classList.remove("text-white");
+            }, 1000);
+        };
+
+        // Запуск
         document.addEventListener('DOMContentLoaded', initApp);
 
     </script>
 </body>
 </html>
+
 
 

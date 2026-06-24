@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="website icon" type="png" href="https://shop.megafon.tj/favicon.ico">
     <meta name="theme-color" content="#00B956">
     <title>Вход - MegaFon Templates</title>
@@ -12,150 +12,313 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
     <style>
+        /* --- ПЕРЕМЕННЫЕ iOS 26 LIQUID-GLASS --- */
         :root {
-            --primary-color: #00B956; /* МегаФон Зеленый */
-            --primary-hover: #00a34c;
-            --text-dark: #222;
-            --text-light: #666;
-            --bg-main: #f4f7f6;
-            --white: #ffffff;
-            --border-color: #e0e0e0;
-            --red: #e74c3c;
-            --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            --primary-color: #00B956;
+            --primary-hover: #00cd5f;
+            --text-dark: #0f172a;
+            --text-light: #64748b;
+            --bg-main: #f4fcf7; 
+            --card-bg: rgba(255, 255, 255, 0.45); 
+            --card-border: rgba(255, 255, 255, 0.6);
+            --input-bg: rgba(255, 255, 255, 0.6);
+            --border-color: rgba(0, 185, 86, 0.08);
+            --red: #ff3b30;
+            --tg-color: #0088cc;
+            --shadow: 0 40px 80px rgba(0, 185, 86, 0.05), inset 0 1px 2px rgba(255,255,255,0.5);
+            --glow-1: rgba(0, 185, 86, 0.25);
+            --glow-2: rgba(0, 136, 204, 0.12);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        [data-theme="dark"] {
+            --text-dark: #f8fafc;
+            --text-light: #94a3b8;
+            --bg-main: #060b08; 
+            --card-bg: rgba(20, 32, 26, 0.6); 
+            --card-border: rgba(255, 255, 255, 0.07);
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --border-color: rgba(255, 255, 255, 0.03);
+            --shadow: 0 50px 100px rgba(0, 0, 0, 0.75), inset 0 1px 1px rgba(255,255,255,0.05);
+            --glow-1: rgba(0, 185, 86, 0.35);
+            --glow-2: rgba(0, 180, 120, 0.1);
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s ease, border-color 0.4s ease, transform 0.3s ease, box-shadow 0.3s ease; 
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
             background-color: var(--bg-main);
             color: var(--text-dark);
             min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            letter-spacing: -0.3px;
+        }
+
+        /* Жидкий бэкграунд — Сфокусирован вокруг центра экрана на ПК и мобильных */
+        .ambient-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .ambient-blur {
+            position: absolute;
+            width: 700px; 
+            height: 700px;
+            border-radius: 50%;
+            filter: blur(140px);
+            animation: pulseGlow 14s ease-in-out infinite alternate;
+            opacity: 0.85;
+        }
+        .blur-1 { top: -150px; left: calc(50% - 550px); background: var(--glow-1); }
+        .blur-2 { bottom: -150px; left: calc(50% - -150px); background: var(--glow-2); animation-delay: -7s; }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.12) translate(40px, -30px); }
+        }
+
+        /* --- ПОЛНОЭКРАННОЕ ПРИВЕТСТВИЕ (SPLASH SCREEN) --- */
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg-main);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            backdrop-filter: blur(30px);
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
+        }
+        #splash-screen.active { opacity: 1; visibility: visible; }
+        .splash-content { text-align: center; z-index: 2; padding: 24px; width: 100%; max-width: 450px; }
+        .splash-logo { width: 160px; margin-bottom: 35px; filter: drop-shadow(0 8px 25px rgba(0,185,86,0.25)); }
+        .splash-title {
+            font-size: clamp(28px, 2.5vw, 36px);
+            font-weight: 800;
+            letter-spacing: -1.2px;
+            margin-bottom: 20px;
+            line-height: 1.3;
+            background: linear-gradient(135deg, var(--text-dark) 60%, var(--primary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .splash-loader-line {
+            width: 80px; height: 4px;
+            background: rgba(0, 185, 86, 0.1);
+            border-radius: 10px;
+            margin: 25px auto 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .splash-loader-line::after {
+            content: '';
+            position: absolute;
+            left: -50%; top: 0; width: 50%; height: 100%;
+            background: var(--primary-color);
+            border-radius: 10px;
+            animation: lineLoad 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        @keyframes lineLoad { 0% { left: -50%; } 100% { left: 100%; } }
+
+        /* --- ИДЕАЛЬНОЕ ЦЕНТРИРОВАНИЕ ДЛЯ ПК И МОБИЛЬНЫХ --- */
+        .page { 
+            display: none; 
+            width: 100%; 
+            min-height: 100vh; /* Заставляет контейнер встать ровно по центру высоты монитора */
+            padding: 24px; 
+            justify-content: center; 
+            align-items: center;
+            z-index: 1; 
+            position: relative;
+        }
+        .page.active { display: flex; }
+
+        .form-container {
+            position: relative;
+            background: var(--card-bg);
+            backdrop-filter: blur(40px) saturate(220%);
+            -webkit-backdrop-filter: blur(40px) saturate(220%);
+            padding: 55px 45px 45px 45px;
+            border-radius: 32px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 440px; /* Идеальная премиальная ширина формы на ПК */
+            text-align: center;
+            border: 1px solid var(--card-border);
+            animation: cardIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @media(max-width: 480px) {
+            .form-container {
+                padding: 45px 24px 35px 24px; /* Мягкое сжатие отступов на смартфонах */
+            }
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(25px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* КНОПКА СМЕНЫ ТЕМЫ (ВНУТРИ КАРТОЧКИ) */
+        .theme-toggle-btn {
+            position: absolute;
+            top: 24px; right: 24px;
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(5px);
+            cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
+            color: var(--text-dark);
+            z-index: 10;
         }
-
-        /* --- КОНТЕЙНЕРЫ СТРАНИЦ --- */
-        .page {
-            display: none; /* Скрыты по умолчанию */
-            width: 100%;
-            padding: 20px;
-            justify-content: center;
+        [data-theme="dark"] .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.04);
         }
-        .page.active {
-            display: flex;
-        }
+        .theme-toggle-btn:hover { transform: scale(1.06); }
+        .theme-toggle-btn svg { width: 18px; height: 18px; fill: currentColor; }
+        .theme-toggle-btn .moon-icon { display: none; }
+        [data-theme="dark"] .theme-toggle-btn .sun-icon { display: none; }
+        [data-theme="dark"] .theme-toggle-btn .moon-icon { display: block; }
 
-        .form-container {
-            background: var(--white);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 455px;
-            text-align: center;
-            animation: fadeIn 0.4s ease;
-        }
+        .logo { width: 165px; margin-bottom: 32px; display: inline-block; }
+        h2 { margin-bottom: 26px; font-size: 28px; font-weight: 800; letter-spacing: -0.6px; }
+        p.desc { color: var(--text-light); margin-bottom: 26px; font-size: 15px; line-height: 1.5; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .logo { width: 180px; margin-bottom: 24px; }
-        h2 { margin-bottom: 24px; font-size: 24px; font-weight: 700; }
-        p.desc { color: var(--text-light); margin-bottom: 20px; font-size: 14px; line-height: 1.5; }
-
-        /* --- ПОЛЯ ВВОДА --- */
-        .form-group { margin-bottom: 20px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+        /* --- СТИЛЬ INPUT TEXT BUBBLE (BORDER-RADIUS 20PX) --- */
+        .form-group { margin-bottom: 22px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: var(--text-dark); padding-left: 8px; opacity: 0.9; }
         .form-group input {
             width: 100%;
-            padding: 12px 16px;
+            padding: 16px 22px;
+            background: var(--input-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 25px; /* Ровный закругленный бабл */
             font-size: 16px;
-            transition: border 0.3s;
+            font-family: inherit;
+            color: var(--text-dark);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.01);
+            backdrop-filter: blur(10px);
+            -webkit-appearance: none;
         }
         .form-group input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0, 185, 86, 0.15);
+            background: var(--card-bg);
+            box-shadow: 0 0 0 4px rgba(0, 185, 86, 0.14), inset 0 1px 2px rgba(0,0,0,0.01);
         }
 
-        /* --- КНОПКИ И ССЫЛКИ --- */
+        /* --- СТИЛЬ КНОПОК BUBBLE (BORDER-RADIUS 20PX) --- */
         .btn-primary {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            padding: 14px;
+            padding: 17px;
             font-size: 16px;
             font-weight: 600;
-            color: var(--white);
-            background-color: var(--primary-color);
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
             border: none;
-            border-radius: 19px;
+            border-radius: 25px; /* Идеальная симметрия с инпутами */
             cursor: pointer;
-            transition: background-color 0.3s;
+            box-shadow: 0 10px 25px rgba(0, 185, 86, 0.2);
         }
-        .btn-primary:hover { background-color: var(--primary-hover); }
-        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(0, 185, 86, 0.3); }
+        .btn-primary:active { transform: scale(0.99); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .auth-toggle { margin-top: 24px; font-size: 14px; color: var(--text-light); }
-        .auth-toggle a { color: var(--primary-color); font-weight: 600; text-decoration: none; }
-        .auth-toggle a:hover { text-decoration: underline; }
-
-        .forgot-password-link {
-            text-align: right;
-            margin-top: -12px;
-            margin-bottom: 20px;
-            font-size: 13px;
-        }
-        .forgot-password-link a { color: var(--text-light); text-decoration: none; }
+        .forgot-password-link { text-align: right; margin-top: -12px; margin-bottom: 26px; font-size: 14px; padding-right: 6px; }
+        .forgot-password-link a { color: var(--text-light); text-decoration: none; font-weight: 500; }
         .forgot-password-link a:hover { color: var(--primary-color); }
 
-        /* --- СООБЩЕНИЯ --- */
-        .error-message, .info-message {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 14px;
-            text-align: left;
-            display: none;
-        }
-        .error-message { background-color: #fdeaea; color: var(--red); border: 1px solid #fadbd8; }
-        .info-message { background-color: #eafaf1; color: #155724; border: 1px solid #d4edda; }
+        .auth-toggle { margin-top: 26px; font-size: 15px; color: var(--text-light); }
+        .auth-toggle a { color: var(--primary-color); font-weight: 700; text-decoration: none; }
+        .auth-toggle a:hover { text-decoration: underline; }
 
-        /* --- СПИННЕР --- */
-        .spinner {
-            display: none;
-            width: 20px; height: 20px;
-            border: 3px solid rgba(255,255,255,0.4);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
+        .support-link { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--border-color); font-size: 14px; }
+        .support-link a { color: var(--tg-color); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        .support-link svg { width: 18px; height: 18px; fill: currentColor; }
+
+        /* Ошибки / Уведомления */
+        .error-message, .info-message { margin-top: 16px; padding: 14px 18px; border-radius: 18px; font-size: 14px; text-align: left; display: none; line-height: 1.4; }
+        .error-message { background-color: rgba(255,59,48,0.08); color: var(--red); border: 1px solid rgba(255,59,48,0.1); }
+        .info-message { background-color: rgba(0,185,86,0.08); color: var(--primary-hover); border: 1px solid rgba(0,185,86,0.1); }
+
+        .spinner { display: none; width: 22px; height: 22px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
         .btn-primary.loading .btn-text { display: none; }
         .btn-primary.loading .spinner { display: inline-block; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* --- TOAST --- */
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast {
-            padding: 16px 24px; border-radius: 12px; color: white; font-weight: 500;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateX(100%); transition: all 0.4s ease;
-        }
-        .toast.show { opacity: 1; transform: translateX(0); }
-        .toast.success { background-color: var(--primary-color); }
-        .toast.error { background-color: var(--red); }
+        /* --- СИСТЕМА ТОСТОВ --- */
+        #toast-container { position: fixed; top: 24px; right: 24px; left: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; align-items: center; }
+        @media(min-width: 480px) { #toast-container { left: auto; width: 360px; align-items: flex-end; } }
+        .toast { padding: 16px 22px; border-radius: 18px; color: white; font-weight: 600; font-size: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.15); opacity: 0; transform: translateY(-20px); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); backdrop-filter: blur(10px); width: 100%; text-align: center; }
+        @media(min-width: 480px) { .toast { transform: translateX(100%); text-align: left; } }
+        .toast.show { opacity: 1; transform: translate(0); }
+        .toast.success { background-color: rgba(0, 185, 86, 0.95); }
+        .toast.error { background-color: rgba(255, 59, 48, 0.95); }
+
+        /* --- СТЕКЛЯННОЕ МОДАЛЬНОЕ ОКНО --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 2000; opacity: 0; transition: opacity 0.3s ease; padding: 20px; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-box { background: var(--card-bg); padding: 45px 35px; border-radius: 28px; box-shadow: var(--shadow); max-width: 400px; width: 100%; text-align: center; border: 1px solid var(--card-border); transform: translateY(20px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); backdrop-filter: blur(30px); }
+        .modal-overlay.active .modal-box { transform: translateY(0); }
+        .modal-box h3 { margin-bottom: 12px; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+        .modal-box p { color: var(--text-light); line-height: 1.5; font-size: 15px; margin-bottom: 26px; }
     </style>
 </head>
 <body>
-    
+
+    <div class="ambient-container">
+        <div class="ambient-blur blur-1"></div>
+        <div class="ambient-blur blur-2"></div>
+    </div>
+
+    <div id="splash-screen">
+        <div class="ambient-container">
+            <div class="ambient-blur blur-1"></div>
+            <div class="ambient-blur blur-2"></div>
+        </div>
+        <div class="splash-content">
+            <img src="https://raw.githubusercontent.com/shop-megafontj/bisozz/refs/heads/main/horizontal-logo.png" alt="MegaFon" class="splash-logo">
+            <h1 class="splash-title" id="dynamic-greeting">Загрузка...</h1>
+            <div class="splash-loader-line"></div>
+        </div>
+    </div>
+
     <div id="toast-container"></div>
+
+    <div id="info-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Регистрация недоступна</h3>
+            <p>Данная функция временно недоступна, ведутся технические работы со стороны разработчиков. Приносим извинения за неудобства.</p>
+            <button class="btn-primary" id="btn-close-info">Понятно</button>
+        </div>
+    </div>
 
     <div id="login-page" class="page active">
         <div class="form-container">
+            
+            <button class="theme-toggle-btn" id="theme-btn">
+                <svg class="sun-icon" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s-1 .45-1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s-1 .45-1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zM11 20v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s-.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s-.39-1.03 0-1.41l-1.06-1.06zm1.06-12.37c-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06c.39-.38.39-1.02 0-1.41zM5.99 18.01l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06c.39-.39.39-1.03 0-1.41z"/></svg>
+                <svg class="moon-icon" viewBox="0 0 24 24"><path d="M12.3 22c5.523 0 10-4.477 10-10 0-5.523-4.477-10-10-10-5.523 0-10 4.477-10 10 0 5.523 4.477 10 10 10zm0-1.8c-4.529 0-8.2-3.671-8.2-8.2 0-4.529 3.671-8.2 8.2-8.2.407 0 .806.03 1.196.087-2.487 1.517-4.143 4.24-4.143 7.348 0 3.109 1.657 5.831 4.145 7.348-.39.057-.79.087-1.198.087z"/></svg>
+            </button>
+
             <img src="https://raw.githubusercontent.com/shop-megafontj/bisozz/refs/heads/main/horizontal-logo.png" alt="MegaFon" class="logo">
             <h2>Вход</h2>
             <form id="login-form">
@@ -180,43 +343,14 @@
                 <p id="login-error" class="error-message"></p>
 
                 <div class="auth-toggle">
-                    Нет аккаунта? <a href="#" id="go-to-register">Зарегистрироваться</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="register-page" class="page">
-        <div class="form-container">
-            <img src="https://raw.githubusercontent.com/shop-megafontj/bisozz/refs/heads/main/horizontal-logo.png" alt="MegaFon" class="logo">
-            <h2>Регистрация</h2>
-            <form id="register-form">
-                <div class="form-group">
-                    <label>ФИО</label>
-                    <input type="text" id="reg-name" required placeholder="Иванов Иван">
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="reg-email" required placeholder="name@megafon.tj">
-                </div>
-                <div class="form-group">
-                    <label>Пароль</label>
-                    <input type="password" id="reg-pass" required placeholder="Минимум 6 символов">
-                </div>
-                <div class="form-group">
-                    <label>Повторите пароль</label>
-                    <input type="password" id="reg-pass-confirm" required>
+                    Нет аккаунта? <a href="#" id="show-disabled-reg">Зарегистрироваться</a>
                 </div>
 
-                <button type="submit" class="btn-primary" id="btn-register">
-                    <span class="btn-text">Отправить заявку</span>
-                    <span class="spinner"></span>
-                </button>
-
-                <p id="reg-error" class="error-message"></p>
-
-                <div class="auth-toggle">
-                    Уже есть аккаунт? <a href="#" id="back-to-login-reg">Войти</a>
+                <div class="support-link">
+                    <a href="https://t.me/komronsharipovv" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.94z"/></svg>
+                        Обратная связь разработчику
+                    </a>
                 </div>
             </form>
         </div>
@@ -224,6 +358,7 @@
 
     <div id="reset-request-page" class="page">
         <div class="form-container">
+
             <img src="https://raw.githubusercontent.com/shop-megafontj/bisozz/refs/heads/main/horizontal-logo.png" alt="MegaFon" class="logo">
             <h2>Восстановление</h2>
             <p class="desc">Введите почту, привязанную к аккаунту. Мы отправим ссылку для создания нового пароля.</p>
@@ -251,6 +386,7 @@
 
     <div id="new-password-page" class="page">
         <div class="form-container">
+
             <img src="https://raw.githubusercontent.com/shop-megafontj/bisozz/refs/heads/main/horizontal-logo.png" alt="MegaFon" class="logo">
             <h2>Новый пароль</h2>
             <p class="desc">Придумайте надежный пароль для входа в систему.</p>
@@ -258,11 +394,11 @@
             <form id="new-password-form">
                 <div class="form-group">
                     <label>Новый пароль</label>
-                    <input type="password" id="new-pass" required>
+                    <input type="password" id="new-pass" required placeholder="Минимум 6 символов">
                 </div>
                 <div class="form-group">
                     <label>Подтвердите пароль</label>
-                    <input type="password" id="new-pass-confirm" required>
+                    <input type="password" id="new-pass-confirm" required placeholder="Повторите пароль">
                 </div>
 
                 <button type="submit" class="btn-primary" id="btn-new-pass">
@@ -276,53 +412,52 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURATION ---
-     const firebaseConfig = {
-  apiKey: "AIzaSyDiT7lVckjmU6UGWsFZQnk-4mDMSXSI2vA",
-  authDomain: "life-a79ef.firebaseapp.com",
-  projectId: "life-a79ef",
-  storageBucket: "life-a79ef.firebasestorage.app",
-  messagingSenderId: "1024688234300",
-  appId: "1:1024688234300:web:94f2bb9b46b3163be34839",
-  measurementId: "G-BHKK3JEQ1G"
-};
+        // --- 1. INITIAL CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDiT7lVckjmU6UGWsFZQnk-4mDMSXSI2vA",
+            authDomain: "life-a79ef.firebaseapp.com",
+            projectId: "life-a79ef",
+            storageBucket: "life-a79ef.firebasestorage.app",
+            messagingSenderId: "1024688234300",
+            appId: "1:1024688234300:web:94f2bb9b46b3163be34839",
+            measurementId: "G-BHKK3JEQ1G"
+        };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
 
         document.addEventListener("DOMContentLoaded", () => {
-            
-            // UI References
             const pages = {
                 login: document.getElementById("login-page"),
-                register: document.getElementById("register-page"),
                 resetRequest: document.getElementById("reset-request-page"),
                 newPassword: document.getElementById("new-password-page")
             };
+            const infoModal = document.getElementById("info-modal");
 
-            // URL Params Check (Handling Reset Link)
             const urlParams = new URLSearchParams(window.location.search);
-            const mode = urlParams.get('mode'); // resetPassword
-            const actionCode = urlParams.get('oobCode'); // Token
+            const mode = urlParams.get('mode'); 
+            const actionCode = urlParams.get('oobCode'); 
             const redirectUrl = urlParams.get('redirect');
 
-            // --- 2. VIEW SWITCHING LOGIC ---
-            function showPage(pageName) {
-                Object.values(pages).forEach(p => p.classList.remove('active'));
-                if(pages[pageName]) pages[pageName].classList.add('active');
-                
-                // Очистка ошибок при смене страниц
-                document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
-                document.querySelectorAll('.info-message').forEach(el => el.style.display = 'none');
-            }
+            let isGreetingRunning = false;
 
-            // Event Listeners for switching
-            document.getElementById("go-to-register").onclick = (e) => { e.preventDefault(); showPage('register'); };
-            document.getElementById("go-to-reset").onclick = (e) => { e.preventDefault(); showPage('resetRequest'); };
-            document.getElementById("back-to-login-reg").onclick = (e) => { e.preventDefault(); showPage('login'); };
-            document.getElementById("back-to-login-reset").onclick = (e) => { e.preventDefault(); showPage('login'); };
+            // --- 2. MULTI-THEME CONTROLLER ---
+            const themeBtn = document.getElementById("theme-btn");
+            const savedTheme = localStorage.getItem("theme") || "light";
+            if (savedTheme === "dark") document.documentElement.setAttribute("data-theme", "dark");
 
-            // --- 3. TOAST NOTIFICATION ---
+            themeBtn.addEventListener("click", () => {
+                const currentTheme = document.documentElement.getAttribute("data-theme");
+                if (currentTheme === "dark") {
+                    document.documentElement.removeAttribute("data-theme");
+                    localStorage.setItem("theme", "light");
+                } else {
+                    document.documentElement.setAttribute("data-theme", "dark");
+                    localStorage.setItem("theme", "dark");
+                }
+            });
+
+            // --- 3. TOAST MESSAGES SYSTEM ---
             function showToast(text, type = 'success') {
                 const container = document.getElementById("toast-container");
                 const toast = document.createElement("div");
@@ -332,36 +467,108 @@
                 setTimeout(() => toast.classList.add("show"), 100);
                 setTimeout(() => {
                     toast.classList.remove("show");
-                    setTimeout(() => container.removeChild(toast), 300);
+                    setTimeout(() => container.removeChild(toast), 400);
                 }, 4000);
             }
 
-            function toggleLoading(btnId, isLoading) {
-                const btn = document.getElementById(btnId);
-                if(isLoading) {
-                    btn.classList.add('loading');
-                    btn.disabled = true;
-                } else {
-                    btn.classList.remove('loading');
-                    btn.disabled = false;
-                }
+            // --- 4. АЛГОРИТМ УМНОГО ПРИВЕТСТВИЯ (ОТСЕКАЕТ ФАМИЛИИ "-ОВ/-ЕВ" И ВЫВОДИТ ТГ-ИМЯ) ---
+            function handleUserGreetingAndRedirect(user) {
+                if (isGreetingRunning) return;
+                isGreetingRunning = true;
+
+                db.ref('/users/' + user.uid).once('value')
+                    .then(snapshot => {
+                        let userName = "Пользователь";
+                        let isAdmin = false;
+
+                        if (snapshot.exists()) {
+                            const data = snapshot.val();
+                            isAdmin = data.isAdmin || false;
+                            
+                            if (data.name) {
+                                let nameParts = data.name.trim().split(/\s+/);
+                                if (nameParts.length > 1) {
+                                    // Очищаем фамилии, чтобы получить только имя ("Комронбек")
+                                    let firstName = nameParts.find(p => 
+                                        !p.toLowerCase().endsWith('ов') && 
+                                        !p.toLowerCase().endsWith('ев') &&
+                                        !p.toLowerCase().endsWith('ова') && 
+                                        !p.toLowerCase().endsWith('ева')
+                                    );
+                                    userName = firstName || nameParts[1] || nameParts[0];
+                                } else {
+                                    userName = nameParts[0];
+                                }
+                            }
+                        }
+
+                        const greetingEl = document.getElementById("dynamic-greeting");
+                        const hours = new Date().getHours();
+                        let greetingText = `Приветствуем, ${userName}!`;
+
+                        if (hours >= 5 && hours < 12) greetingText = `Доброе утро , ${userName}!`;
+                        else if (hours >= 12 && hours < 17) greetingText = `Добрый день , ${userName}!`;
+                        else if (hours >= 17 && hours < 22) greetingText = `Добрый вечер , ${userName}!`;
+                        else greetingText = `Доброй ночи , ${userName}!`;
+
+                        greetingEl.textContent = greetingText;
+                        document.getElementById("splash-screen").classList.add("active");
+
+                        setTimeout(() => {
+                            if (redirectUrl) { 
+                                window.location.href = redirectUrl; 
+                            } else {
+                                window.location.href = isAdmin ? "admin.html" : "operator.html";
+                            }
+                        }, 3000);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        window.location.href = "index.html";
+                    });
             }
 
-            // --- 4. AUTH LOGIC: INITIAL CHECK ---
-            // Если в URL есть 'mode', значит мы пришли из письма, НЕ делаем авто-вход
+            // --- 5. MODALS ENGINE ---
+            function openModal(modalEl) {
+                modalEl.style.display = 'flex';
+                setTimeout(() => modalEl.classList.add('active'), 10);
+            }
+            function closeModal(modalEl) {
+                modalEl.classList.remove('active');
+                setTimeout(() => modalEl.style.display = 'none', 300);
+            }
+            document.getElementById("show-disabled-reg").addEventListener('click', (e) => { 
+                e.preventDefault(); 
+                openModal(infoModal); 
+            });
+            document.getElementById("btn-close-info").addEventListener('click', () => closeModal(infoModal));
+
+            // --- 6. ROUTING ROUTINES ---
+            function showPage(pageName) {
+                Object.values(pages).forEach(p => p.classList.remove('active'));
+                if(pages[pageName]) pages[pageName].classList.add('active');
+                document.querySelectorAll('.error-message, .info-message').forEach(el => el.style.display = 'none');
+            }
+            document.getElementById("go-to-reset").onclick = (e) => { e.preventDefault(); showPage('resetRequest'); };
+            document.getElementById("back-to-login-reset").onclick = (e) => { e.preventDefault(); showPage('login'); };
+
+            function toggleLoading(btnId, isLoading) {
+                const btn = document.getElementById(btnId);
+                if(isLoading) { btn.classList.add('loading'); btn.disabled = true; } 
+                else { btn.classList.remove('loading'); btn.disabled = false; }
+            }
+
+            // --- 7. DEEP FLOW ROUTING ---
             if (mode === 'resetPassword' && actionCode) {
                 showPage('newPassword');
                 handlePasswordReset(actionCode);
             } else {
-                // Обычный вход: проверяем, авторизован ли уже
                 auth.onAuthStateChanged(user => {
-                    if (user) {
-                        checkUserRoleAndRedirect(user);
-                    }
+                    if (user) handleUserGreetingAndRedirect(user);
                 });
             }
 
-            // --- 5. LOGIC: LOGIN ---
+            // --- 8. SUBMIT: LOGIN ---
             document.getElementById("login-form").addEventListener("submit", (e) => {
                 e.preventDefault();
                 const email = document.getElementById("login-email").value;
@@ -379,44 +586,7 @@
                     });
             });
 
-            // --- 6. LOGIC: REGISTER ---
-            document.getElementById("register-form").addEventListener("submit", (e) => {
-                e.preventDefault();
-                const name = document.getElementById("reg-name").value;
-                const email = document.getElementById("reg-email").value;
-                const pass = document.getElementById("reg-pass").value;
-                const confirm = document.getElementById("reg-pass-confirm").value;
-                const errorEl = document.getElementById("reg-error");
-
-                if (pass !== confirm) {
-                    errorEl.textContent = "Пароли не совпадают";
-                    errorEl.style.display = 'block';
-                    return;
-                }
-
-                toggleLoading("btn-register", true);
-
-                auth.createUserWithEmailAndPassword(email, pass)
-                    .then((cred) => {
-                        return db.ref('users/' + cred.user.uid).set({
-                            name: name,
-                            email: email,
-                            isAdmin: false,
-                            approved: false
-                        });
-                    })
-                    .then(() => {
-                        showToast("Регистрация успешна! Перенаправление...", "success");
-                        setTimeout(() => window.location.href = "index.html", 1500);
-                    })
-                    .catch(err => {
-                        toggleLoading("btn-register", false);
-                        errorEl.textContent = getErrorMessage(err.code);
-                        errorEl.style.display = 'block';
-                    });
-            });
-
-            // --- 7. LOGIC: SEND RESET EMAIL ---
+            // --- 9. SUBMIT: SEND RESET LINK ---
             document.getElementById("reset-request-form").addEventListener("submit", (e) => {
                 e.preventDefault();
                 const email = document.getElementById("reset-email").value;
@@ -424,12 +594,11 @@
                 const errEl = document.getElementById("reset-req-error");
 
                 toggleLoading("btn-reset-request", true);
-                msgEl.style.display = 'none';
-                errEl.style.display = 'none';
+                msgEl.style.display = 'none'; errEl.style.display = 'none';
 
                 auth.sendPasswordResetEmail(email)
                     .then(() => {
-                        msgEl.textContent = "Ссылка отправлена! Проверьте почту (и папку спам).";
+                        msgEl.textContent = "Письмо отправлено! Проверьте вашу почту.";
                         msgEl.style.display = 'block';
                         document.getElementById("reset-request-form").reset();
                     })
@@ -437,12 +606,10 @@
                         errEl.textContent = getErrorMessage(err.code);
                         errEl.style.display = 'block';
                     })
-                    .finally(() => {
-                        toggleLoading("btn-reset-request", false);
-                    });
+                    .finally(() => { toggleLoading("btn-reset-request", false); });
             });
 
-            // --- 8. LOGIC: CONFIRM NEW PASSWORD (Hidden Page) ---
+            // --- 10. SUBMIT: CONFIRM NEW PASSWORD ---
             function handlePasswordReset(code) {
                 document.getElementById("new-password-form").addEventListener("submit", (e) => {
                     e.preventDefault();
@@ -450,62 +617,31 @@
                     const confirm = document.getElementById("new-pass-confirm").value;
                     const errorEl = document.getElementById("new-pass-error");
 
-                    if(newPass.length < 6) {
-                        errorEl.textContent = "Пароль слишком короткий (минимум 6 символов)";
-                        errorEl.style.display = 'block';
-                        return;
-                    }
-                    if (newPass !== confirm) {
-                        errorEl.textContent = "Пароли не совпадают";
-                        errorEl.style.display = 'block';
-                        return;
-                    }
+                    if(newPass.length < 6) { errorEl.textContent = "Пароль должен быть от 6 символов."; errorEl.style.display = 'block'; return; }
+                    if (newPass !== confirm) { errorEl.textContent = "Пароли не совпадают."; errorEl.style.display = 'block'; return; }
 
                     toggleLoading("btn-new-pass", true);
-
                     auth.confirmPasswordReset(code, newPass)
                         .then(() => {
-                            showToast("Пароль успешно изменен!", "success");
-                            // Очищаем URL
+                            showToast("Пароль успешно обновлен!", "success");
                             window.history.replaceState({}, document.title, window.location.pathname);
                             setTimeout(() => showPage('login'), 2000);
                         })
                         .catch(err => {
-                            errorEl.textContent = err.code === 'auth/invalid-action-code' 
-                                ? "Ссылка устарела или уже использована." 
-                                : getErrorMessage(err.code);
-                            errorEl.style.display = 'block';
+                            errorEl.textContent = err.code === 'auth/invalid-action-code' ? "Код устарел или недействителен." : getErrorMessage(err.code);
+                            errorEl.style.display = 'block'; 
                         })
-                        .finally(() => {
-                            toggleLoading("btn-new-pass", false);
-                        });
-                });
-            }
-
-            // --- HELPERS ---
-            function checkUserRoleAndRedirect(user) {
-                if (redirectUrl) { window.location.href = redirectUrl; return; }
-                
-                db.ref('/users/' + user.uid).once('value').then(snapshot => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        window.location.href = data.isAdmin ? "admin.html" : "operator.html";
-                    } else {
-                        // Если юзера нет в базе (редкий кейс)
-                        window.location.href = "index.html"; 
-                    }
+                        .finally(() => { toggleLoading("btn-new-pass", false); });
                 });
             }
 
             function getErrorMessage(code) {
                 switch (code) {
-                    case 'auth/user-not-found': return "Пользователь с такой почтой не найден.";
+                    case 'auth/user-not-found': return "Аккаунт с такой почтой не найден.";
                     case 'auth/wrong-password': return "Неверный пароль.";
-                    case 'auth/invalid-email': return "Некорректный Email.";
-                    case 'auth/email-already-in-use': return "Эта почта уже зарегистрирована.";
-                    case 'auth/weak-password': return "Пароль слишком простой.";
-                    case 'auth/too-many-requests': return "Слишком много попыток. Попробуйте позже.";
-                    default: return "Произошла ошибка: " + code;
+                    case 'auth/invalid-email': return "Некорректная электронная почта.";
+                    case 'auth/too-many-requests': return "Попытка заблокирована. Попробуйте позже.";
+                    default: return "Ошибка системы: " + code;
                 }
             }
         });

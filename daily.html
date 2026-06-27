@@ -3,268 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Конструктор Ежедневной АП — Life 2.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <title>Конструктор Ежедневной АП — МегаФон Таджикистан</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #00B956;
-            --bg-color: #f0f2f5;
-            --glass-bg: rgba(255, 255, 255, 0.4);
-            --glass-border: rgba(255, 255, 255, 0.6);
-            --text-main: #333;
-            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
-        }
-
-        body.dark {
-            --bg-color: #121212;
-            --glass-bg: rgba(30, 30, 30, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-main: #eee;
-            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
-
+        /* === Корпоративный стиль МегаФон (iOS Liquid Glass) === */
         body {
-            font-family: 'Manrope', sans-serif;
-            background: var(--bg-color);
-            color: var(--text-main);
             margin: 0;
-            padding: 20px;
-            transition: all 0.3s;
+            padding: 16px;
+            font-family: 'Manrope', sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+            background: #5E11A6; /* Фирменный глубокий фиолетовый МегаФон */
+            background-attachment: fixed;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 500px;
             margin: 0 auto;
         }
 
+        /* === Premium Glass Панели === */
         .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 24px;
             padding: 24px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.25);
             margin-bottom: 20px;
         }
 
-        h1, h2 { color: var(--primary); margin-top: 0; }
-        
-        .section-title {
-            font-size: 14px;
+        h1 {
+            font-size: 20px;
             font-weight: 800;
-            margin: 15px 0 10px 0;
+            margin: 0 0 4px 0;
+            letter-spacing: -0.3px;
+        }
+        
+        .subtitle {
+            font-size: 11px;
+            opacity: 0.6;
+            margin: 0 0 24px 0;
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            margin: 20px 0 10px 0;
             text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* === Поле отображения цены === */
+        .price-display {
+            display: inline-flex;
+            align-items: baseline;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 10px 20px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 5px;
+        }
+        .price-display span.amount {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+        }
+        .price-display span.currency {
+            margin-left: 6px;
+            font-size: 12px;
+            font-weight: 600;
             opacity: 0.7;
         }
 
-        /* Стили для ячеек (как на скриншоте) */
+        /* === Скролл-контейнер для Pills === */
         .pill-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 8px;
         }
 
+        .scrollable-pills {
+            max-height: 125px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+        .scrollable-pills::-webkit-scrollbar { width: 4px; }
+        .scrollable-pills::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+
+        /* === Кнопки-ячейки (Pills) === */
         .pill {
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 12px;
-            padding: 10px 16px;
-            font-size: 15px;
+            padding: 9px 14px;
+            font-size: 13px;
             font-weight: 700;
-            color: var(--text-main);
+            color: rgba(255, 255, 255, 0.8);
             cursor: pointer;
             transition: all 0.2s ease;
             user-select: none;
         }
 
-        body.dark .pill {
-            background: rgba(0, 0, 0, 0.3);
-            color: white;
-        }
-
         .pill:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
         }
 
         .pill.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            box-shadow: 0 4px 15px rgba(0, 185, 86, 0.4);
-        }
-
-        /* Инпут для цены */
-        .price-input-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 5px 15px;
-            width: fit-content;
-        }
-        body.dark .price-input-wrapper { background: rgba(0, 0, 0, 0.3); }
-
-        .price-input-wrapper input {
-            background: transparent;
-            border: none;
-            font-size: 24px;
+            background: #ffffff;
+            color: #00B956;
+            border-color: #ffffff;
             font-weight: 800;
-            color: var(--text-main);
-            width: 80px;
-            outline: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
+        /* === Блок итогов суточного лимита === */
         .result-box {
-            background: rgba(0, 185, 86, 0.1);
-            border: 1px solid rgba(0, 185, 86, 0.3);
-            padding: 15px;
-            border-radius: 16px;
-            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 18px;
+            border-radius: 18px;
+            margin-top: 25px;
+        }
+
+        .result-box h2 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 14px;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .daily-stat {
             display: flex;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            padding: 8px 0;
-            font-weight: 700;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 12px 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
         }
-        body.dark .daily-stat { border-bottom-color: rgba(255,255,255,0.05); }
-        .daily-stat:last-child { border: none; }
-        .daily-stat span:last-child { color: var(--primary); font-size: 18px; }
-
-        .template-block {
-            position: relative;
-            background: rgba(0,0,0,0.03);
-            padding: 15px;
-            border-radius: 12px;
-            margin-top: 15px;
+        .daily-stat:last-child { border: none; padding-bottom: 0; }
+        .daily-stat:first-child { padding-top: 0; }
+        
+        .daily-stat span:last-child {
+            font-weight: 700;
             font-size: 14px;
+            color: #ffffff;
+        }
+
+        /* === Интерактивные Контейнеры Шаблонов (Вместо кнопок) === */
+        .template-block {
+            background: rgba(255, 255, 255, 0.92);
+            color: #1c1c1e;
+            padding: 18px;
+            border-radius: 16px;
+            margin-top: 12px;
+            font-size: 13px;
             line-height: 1.5;
-        }
-        body.dark .template-block { background: rgba(255,255,255,0.05); }
-
-        .btn-copy {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 12px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            transition: 0.2s;
+            user-select: none; /* Защита от выделения текста синим цветом при тапе */
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
         }
-        .btn-copy:active { transform: scale(0.95); }
 
+        /* Эффект наведения */
+        .template-block:hover {
+            background: #ffffff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Эффект нажатия (iOS Click) */
+        .template-block:active {
+            transform: scale(0.97);
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        /* === Всплывающий Тост === */
         .toast {
             position: fixed;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
-            transform: translateX(-50%);
-            background: var(--text-main);
-            color: var(--bg-color);
-            padding: 10px 20px;
+            transform: translateX(-50%) translateY(20px);
+            background: #00B956;
+            color: #fff;
+            padding: 10px 22px;
             border-radius: 20px;
             font-weight: 700;
+            font-size: 13px;
             opacity: 0;
             visibility: hidden;
-            transition: 0.3s;
+            transition: 0.3s ease;
             z-index: 1000;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
-        .toast.show { opacity: 1; visibility: visible; }
+        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- Главный конфигуратор -->
     <div class="glass-card">
         <h1>📊 Конструктор: Ежедневная АП</h1>
+        <div class="subtitle">Автоматический расчет по логике SBMS для «Биё! Бисоз 2.0»</div>
         
-        <div class="section-title">Итоговая цена (сомони / месяц)</div>
-        <div class="price-input-wrapper">
-            <input type="number" id="m-price" value="109">
-            <span style="font-weight: 700; opacity: 0.7;">сомони</span>
+        <div class="section-title">Итоговая АП (сомони / месяц)</div>
+        <div class="price-display">
+            <span class="amount" id="m-price-display">0.00</span>
+            <span class="currency">сомони</span>
         </div>
 
         <div class="section-title">Интернет</div>
-        <div class="pill-group" id="gb-container"></div>
+        <div class="pill-group scrollable-pills" id="gb-container"></div>
 
         <div class="section-title">Минуты по РТ</div>
-        <div class="pill-group" id="min-container"></div>
+        <div class="pill-group scrollable-pills" id="min-container"></div>
 
         <div class="section-title">SMS по РТ</div>
         <div class="pill-group" id="sms-container"></div>
 
+        <!-- Результаты вычислений (Зеркало Единого Окна) -->
         <div class="result-box">
-            <h2 style="font-size: 16px; margin-bottom: 10px;">Суточный лимит (на 24 часа):</h2>
-            <div class="daily-stat"><span>Стоимость в сутки (+30%):</span> <span id="d-price">0.00 сомони</span></div>
-            <div class="daily-stat"><span>Интернет:</span> <span id="d-gb">0 МБ</span></div>
-            <div class="daily-stat"><span>Минуты:</span> <span id="d-min">0 мин</span></div>
-            <div class="daily-stat"><span>SMS:</span> <span id="d-sms">0 шт</span></div>
+            <h2>Суточный лимит (на 24 часа):</h2>
+            <div class="daily-stat"><span>Стоимость суток (+30%):</span> <span id="d-price">0.00 TJS</span></div>
+            <div class="daily-stat"><span>Интернет:</span> <span id="d-gb" style="color: #00FF7F;">0 мб</span></div>
+            <div class="daily-stat"><span>Минуты по РТ:</span> <span id="d-min">0 мин</span></div>
+            <div class="daily-stat"><span>SMS по РТ:</span> <span id="d-sms">0 шт</span></div>
         </div>
     </div>
 
+    <!-- Текстовые скрипты ответов (Клик на весь блок копирует текст) -->
     <div class="glass-card">
-        <h2>📝 Готовые шаблоны</h2>
+        <h2 style="font-size: 15px; margin: 0 0 5px 0;">📝 Готовые шаблоны для чата</h2>
+        <p style="font-size: 11px; opacity: 0.5; margin: 0 0 15px 0;">Нажмите на нужный контейнер для быстрого копирования текста</p>
         
-        <div class="template-block">
-            <button class="btn-copy" onclick="copyText('tpl-main-tj')">Копировать</button>
+        <div class="template-block" onclick="copyText('tpl-main-tj')" title="Нажмите, чтобы скопировать на таджикском">
             <div id="tpl-main-tj"></div>
         </div>
 
-        <div class="template-block">
-            <button class="btn-copy" onclick="copyText('tpl-main-ru')">Копировать</button>
+        <div class="template-block" onclick="copyText('tpl-main-ru')" title="Нажмите, чтобы скопировать на русском">
             <div id="tpl-main-ru"></div>
         </div>
     </div>
 </div>
 
-<div class="toast" id="toast">Скопировано!</div>
+<div class="toast" id="toast">Текст успешно скопирован! ✨</div>
 
 <script>
-    // 1. Ваш JSON из Firebase
-    const firebaseData = {
-      "life2": {
+    const tariff = {
         "basePrice": 65,
         "internet": {
-          "prices": [0, 1.5, 1.5, 1.5, 1.5, 1.5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-          "values": [15, 16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150]
+            "prices": [0, 1.5, 1.5, 1.5, 1.5, 1.5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+            "values": [15, 16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150]
         },
-        "maxTotal": 358.5,
         "minutes": {
-          "prices": [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-          "values": [50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350, 360, 370, 380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500]
+            "prices": [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            "values": [50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350, 360, 370, 380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500]
         },
         "sms": {
-          "prices": [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-          "values": [0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300]
+            "prices": [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            "values": [0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300]
         }
-      }
     };
 
-    const tariff = firebaseData.life2;
+    let state = { gbIndex: 14, minIndex: 0, smsIndex: 0 };
 
-    // Сохраняем ИНДЕКСЫ выбранных элементов, а не сами значения, 
-    // чтобы правильно считать цену по массиву prices
-    let state = {
-        gbIndex: 10,  // По умолчанию: индекс 10 (30 ГБ)
-        minIndex: 15, // По умолчанию: индекс 15 (200 мин)
-        smsIndex: 2   // По умолчанию: индекс 2 (50 SMS)
-    };
+    function getCostBySteps(arr, maxIndex) {
+        let total = 0;
+        for(let i = 0; i <= maxIndex; i++) {
+            total += arr[i];
+        }
+        return total;
+    }
 
-    // Вспомогательная функция для подсчета суммы массива до определенного индекса
-    const sumPrices = (arr, maxIndex) => arr.slice(0, maxIndex + 1).reduce((acc, val) => acc + val, 0);
-
-    // 2. Функция для рендера кнопок-ячеек из Firebase структуры
     function renderPills(containerId, dataObj, stateKey, suffix) {
         const container = document.getElementById(containerId);
         container.innerHTML = ''; 
@@ -273,73 +292,51 @@
             const btn = document.createElement('div');
             btn.className = 'pill';
             if (state[stateKey] === index) btn.classList.add('active');
-            
             btn.innerText = `${value} ${suffix}`;
             
             btn.onclick = () => {
                 Array.from(container.children).forEach(child => child.classList.remove('active'));
                 btn.classList.add('active');
-                
-                // Обновляем индекс в стейте
                 state[stateKey] = index;
                 calculateDaily();
             };
-            
             container.appendChild(btn);
         });
     }
 
-    // 3. Основная математика и обновление UI
     function calculateDaily() {
-        // 1) Считаем итоговую цену месяца на основе JSON:
-        // Базовая цена + сумма шагов по интернету + сумма шагов по минутам + сумма шагов по SMS
-        const calculatedMPrice = tariff.basePrice 
-                               + sumPrices(tariff.internet.prices, state.gbIndex)
-                               + sumPrices(tariff.minutes.prices, state.minIndex)
-                               + sumPrices(tariff.sms.prices, state.smsIndex);
+        const mPrice = tariff.basePrice + 
+                       getCostBySteps(tariff.internet.prices, state.gbIndex) +
+                       getCostBySteps(tariff.minutes.prices, state.minIndex) +
+                       getCostBySteps(tariff.sms.prices, state.smsIndex);
 
-        // Обновляем инпут цены (оставляем инпут на случай, если оператору нужно вбить нестандартную скидку)
-        const priceInput = document.getElementById('m-price');
-        // Если оператор сам не меняет инпут руками, подставляем расчетную
-        if (document.activeElement !== priceInput) {
-            priceInput.value = calculatedMPrice;
-        }
-        
-        const mPrice = parseFloat(priceInput.value) || 0;
-        
-        // Математика Ежедневной АП: (АП / 30) + 30%
         const dPrice = ((mPrice / 30) * 1.3).toFixed(2);
         
-        // Достаем сами значения (ГБ, Мин, SMS) по выбранным индексам
-        const gbValue = tariff.internet.values[state.gbIndex];
-        const minValue = tariff.minutes.values[state.minIndex];
-        const smsValue = tariff.sms.values[state.smsIndex];
+        const mGb = tariff.internet.values[state.gbIndex];
+        const mMin = tariff.minutes.values[state.minIndex];
+        const mSms = tariff.sms.values[state.smsIndex];
 
-        // 1 ГБ = 1024 МБ
-        let dMb = ((gbValue * 1024) / 30).toFixed(0); 
-        let dGbDisplay = dMb >= 1024 ? (dMb / 1024).toFixed(2) + ' ГБ' : dMb + ' МБ';
+        const totalMb = mGb * 1024;
+        const dMb = Math.ceil(totalMb / 30); 
+        const dMin = Math.ceil(mMin / 30);  
+        const dSms = Math.ceil(mSms / 30);  
 
-        const dMin = Math.floor(minValue / 30);
-        const dSms = Math.floor(smsValue / 30);
-
-        // Обновляем статистику на экране
-        document.getElementById('d-price').innerText = `${dPrice} сомони`;
-        document.getElementById('d-gb').innerText = dGbDisplay;
+        document.getElementById('m-price-display').innerText = mPrice.toFixed(2);
+        document.getElementById('d-price').innerText = `${dPrice} TJS`;
+        document.getElementById('d-gb').innerText = `${dMb} мб`;
         document.getElementById('d-min').innerText = `${dMin} мин`;
         document.getElementById('d-sms').innerText = `${dSms} шт`;
 
-        // Обновляем текст шаблонов
-        const tplTj = `Муштарии муҳтарам! Бинобар нокифоя будани маблағ барои пардохти моҳона (${mPrice} сомонӣ), ба Шумо хизматрасонии «Пардохти ҳаррӯза» ба таври худкор фаъол карда шуд. Барои ${dPrice} сомонӣ дар 24 соат Шумо: зангҳои бемаҳдуд дар дохили шабака, ${dMin} дақиқа ба дигар шабакаҳои ҶТ, ${dGbDisplay} интернет ва ${dSms} SMS дастрас намудед. Таваҷҷӯҳ: Интернети шабона, ИВИ ва Оила ТВ ба ин баста дохил намешаванд! Барои гузаштан ба тарофаи моҳона, тавозунро ба пуррагӣ пур кунед.`;
+        const tplTj = `Муштарии муҳтарам! Бинобар нокифоя будани маблағ барои пардохти моҳона (${mPrice.toFixed(2)} сомонӣ), ба Шумо хизматрасонии «Пардохти ҳаррӯза» ба таври худкор фаъол карда шуд. Барои ${dPrice} сомонӣ дар 24 соат Шумо: зангҳои бемаҳдуд дар дохили шабака, ${dMin} дақиқа ба дигар шабакаҳои ҶТ, ${dMb} МБ интернет ва ${dSms} SMS дастрас намудед. Таваҷҷӯҳ: Интернети шабона, ИВИ ва Оила ТВ ба ин баста дохил намешаванд! Барои гузаштан ба тарофаи моҳона, тавозунро ба пуррагӣ пур кунед.`;
         
-        const tplRu = `Уважаемый абонент! Так как на балансе недостаточно средств для оплаты за месяц (${mPrice} сомони), автоматически подключилась «Ежедневная абонентская плата». За ${dPrice} сомони на 24 часа вам начислены: безлимит внутри сети, ${dMin} мин по РТ, ${dGbDisplay} интернета и ${dSms} SMS. Важно: Ночной безлимит, ИВИ и Оила ТВ в пакет не входят! Для возврата на тариф на месяц, пополните баланс на полную сумму.`;
+        const tplRu = `Уважаемый абонент! Так как на балансе недостаточно средств для оплаты за месяц (${mPrice.toFixed(2)} сомони), автоматически подключилась «Ежедневная абонентская плата». За ${dPrice} сомони на 24 часа вам начислены: безлимит внутри сети, ${dMin} мин по РТ, ${dMb} МБ интернета и ${dSms} SMS. Важно: Ночной безлимит, ИВИ и Оила ТВ в пакет не входят! Для возврата на тариф на месяц, пополните баланс на полную сумму.`;
 
         document.getElementById('tpl-main-tj').innerText = tplTj;
         document.getElementById('tpl-main-ru').innerText = tplRu;
     }
 
-    // 4. Утилиты (Копирование и Тосты)
+    const toast = document.getElementById('toast');
     function showToast() {
-        const toast = document.getElementById('toast');
         toast.classList.add('show');
         setTimeout(() => toast.classList.remove('show'), 2000);
     }
@@ -349,16 +346,10 @@
         navigator.clipboard.writeText(text).then(showToast);
     }
 
-    // Слушаем изменение цены руками (если оператору надо вписать свою сумму)
-    document.getElementById('m-price').addEventListener('input', calculateDaily);
-
-    // Инициализация при старте страницы
     renderPills('gb-container', tariff.internet, 'gbIndex', 'ГБ');
     renderPills('min-container', tariff.minutes, 'minIndex', 'мин');
     renderPills('sms-container', tariff.sms, 'smsIndex', 'SMS');
     calculateDaily();
-
 </script>
-
 </body>
 </html>

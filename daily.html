@@ -6,147 +6,197 @@
     <title>Конструктор Ежедневной АП — МегаФон Таджикистан</title>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* === Корпоративный стиль МегаФон (iOS Liquid Glass) === */
+        /* === Базовые стили в стиле МегаФон (светлая тема) === */
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             margin: 0;
-            padding: 16px;
+            padding: 0 0 30px 0;
             font-family: 'Manrope', sans-serif;
+            color: #1C1C1E;
+            background: #F5F7FA;
+        }
+
+        /* === Верхний промо-баннер из 37886.jpg === */
+        .promo-banner {
+            background: #00B956;
+            background: linear-gradient(135deg, #00B956 0%, #00A34A 100%);
+            padding: 30px 20px;
+            text-align: center;
             color: #ffffff;
-            min-height: 100vh;
-            background: #5E11A6; /* Фирменный глубокий фиолетовый МегаФон */
-            background-attachment: fixed;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .promo-banner h0 {
+            display: block;
+            font-size: 26px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+        
+        .promo-banner p {
+            font-size: 13px;
+            margin: 0;
+            opacity: 0.9;
+            font-weight: 600;
         }
 
-        .container {
-            max-width: 500px;
+        /* === Полностью адаптивная сетка (Responsive Grid) === */
+        .app-grid {
+            max-width: 1140px;
             margin: 0 auto;
+            padding: 0 16px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
         }
 
-        /* === Premium Glass Панели === */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 24px;
+        /* Трансформация в 2 колонки на больших экранах */
+        @media (min-width: 850px) {
+            .app-grid {
+                grid-template-columns: 1.2fr 1fr;
+                align-items: start;
+            }
+            .sticky-side {
+                position: sticky;
+                top: 20px;
+            }
+        }
+
+        /* === Белые корпоративные карточки === */
+        .white-card {
+            background: #ffffff;
+            border-radius: 20px;
             padding: 24px;
-            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.25);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+            border: 1px solid #EBF0F5;
             margin-bottom: 20px;
         }
+        .white-card:last-child { margin-bottom: 0; }
 
         h1 {
             font-size: 20px;
             font-weight: 800;
-            margin: 0 0 4px 0;
+            margin: 0 0 6px 0;
+            color: #1C1C1E;
             letter-spacing: -0.3px;
         }
         
         .subtitle {
-            font-size: 11px;
-            opacity: 0.6;
-            margin: 0 0 24px 0;
+            font-size: 12px;
+            color: #8E8E93;
+            margin: 0 0 20px 0;
             font-weight: 600;
         }
 
         .section-title {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             margin: 20px 0 10px 0;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 0.5px;
+            color: #8E8E93;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        /* === Поле отображения цены === */
+        /* === Отображение цены === */
         .price-display {
             display: inline-flex;
             align-items: baseline;
-            background: rgba(0, 0, 0, 0.25);
+            background: #F2F5F9;
             padding: 10px 20px;
             border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
             margin-bottom: 5px;
         }
         .price-display span.amount {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 800;
-            color: #fff;
+            color: #00B956;
         }
         .price-display span.currency {
             margin-left: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            opacity: 0.7;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1C1C1E;
         }
 
-        /* === Скролл-контейнер для Pills === */
+        /* === Плитка кнопок выбора (Pills) как в референсе === */
         .pill-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
         }
 
         .scrollable-pills {
-            max-height: 125px;
+            max-height: 160px;
             overflow-y: auto;
-            padding-right: 6px;
+            padding-right: 4px;
         }
         .scrollable-pills::-webkit-scrollbar { width: 4px; }
-        .scrollable-pills::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+        .scrollable-pills::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
 
-        /* === Кнопки-ячейки (Pills) === */
         .pill {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 9px 14px;
-            font-size: 13px;
+            background: #ffffff;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
             font-weight: 700;
-            color: rgba(255, 255, 255, 0.8);
+            color: #00B956;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             user-select: none;
+            text-align: center;
+            min-width: 58px;
         }
 
         .pill:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: #fff;
+            border-color: #00B956;
+            background: rgba(0, 185, 86, 0.03);
         }
 
+        /* Активное состояние кнопки (Зеленый фон, белый текст) */
         .pill.active {
-            background: #ffffff;
-            color: #00B956;
-            border-color: #ffffff;
-            font-weight: 800;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: #00B956;
+            color: #ffffff;
+            border-color: #00B956;
+            box-shadow: 0 4px 10px rgba(0, 185, 86, 0.2);
         }
 
-        /* === Блок итогов суточного лимита === */
+        /* === Блок результатов вычислений === */
         .result-box {
-            background: rgba(0, 0, 0, 0.18);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 18px;
-            border-radius: 18px;
-            margin-top: 25px;
+            background: #F8FAFC;
+            border: 1px solid #EBF0F5;
+            padding: 20px;
+            border-radius: 16px;
         }
 
         .result-box h2 {
             font-size: 14px;
-            font-weight: 700;
+            font-weight: 800;
             margin-top: 0;
-            margin-bottom: 14px;
-            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 12px;
+            color: #1C1C1E;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .daily-stat {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid #EBF0F5;
             padding: 12px 0;
             font-size: 13px;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.7);
+            color: #636366;
         }
         .daily-stat:last-child { border: none; padding-bottom: 0; }
         .daily-stat:first-child { padding-top: 0; }
@@ -154,36 +204,33 @@
         .daily-stat span:last-child {
             font-weight: 700;
             font-size: 14px;
-            color: #ffffff;
+            color: #1C1C1E;
         }
 
-        /* === Интерактивные Контейнеры Шаблонов (Вместо кнопок) === */
+        /* === Блоки быстрого копирования текста === */
         .template-block {
-            background: rgba(255, 255, 255, 0.92);
-            color: #1c1c1e;
-            padding: 18px;
-            border-radius: 16px;
+            background: #F2F5F9;
+            color: #1C1C1E;
+            padding: 16px;
+            border-radius: 14px;
             margin-top: 12px;
             font-size: 13px;
             line-height: 1.5;
             font-weight: 600;
             cursor: pointer;
-            user-select: none; /* Защита от выделения текста синим цветом при тапе */
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            transition: all 0.2s ease;
             border: 1px solid transparent;
         }
 
-        /* Эффект наведения */
         .template-block:hover {
-            background: #ffffff;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-            transform: translateY(-2px);
+            background: #EBF0F5;
+            border-color: #D1D9E6;
         }
 
-        /* Эффект нажатия (iOS Click) */
         .template-block:active {
-            transform: scale(0.97);
-            background: rgba(255, 255, 255, 0.85);
+            transform: scale(0.99);
+            background: #E2E8F0;
         }
 
         /* === Всплывающий Тост === */
@@ -192,70 +239,84 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
-            background: #00B956;
+            background: #1C1C1E;
             color: #fff;
-            padding: 10px 22px;
+            padding: 10px 20px;
             border-radius: 20px;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 12px;
             opacity: 0;
             visibility: hidden;
-            transition: 0.3s ease;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- Главный конфигуратор -->
-    <div class="glass-card">
-        <h1>📊 Конструктор: Ежедневная АП</h1>
-        <div class="subtitle">Автоматический расчет по логике SBMS для «Биё! Бисоз 2.0»</div>
-        
-        <div class="section-title">Итоговая АП (сомони / месяц)</div>
-        <div class="price-display">
-            <span class="amount" id="m-price-display">0.00</span>
-            <span class="currency">сомони</span>
-        </div>
-
-        <div class="section-title">Интернет</div>
-        <div class="pill-group scrollable-pills" id="gb-container"></div>
-
-        <div class="section-title">Минуты по РТ</div>
-        <div class="pill-group scrollable-pills" id="min-container"></div>
-
-        <div class="section-title">SMS по РТ</div>
-        <div class="pill-group" id="sms-container"></div>
-
-        <!-- Результаты вычислений (Зеркало Единого Окна) -->
-        <div class="result-box">
-            <h2>Суточный лимит (на 24 часа):</h2>
-            <div class="daily-stat"><span>Стоимость суток (+30%):</span> <span id="d-price">0.00 TJS</span></div>
-            <div class="daily-stat"><span>Интернет:</span> <span id="d-gb" style="color: #00FF7F;">0 мб</span></div>
-            <div class="daily-stat"><span>Минуты по РТ:</span> <span id="d-min">0 мин</span></div>
-            <div class="daily-stat"><span>SMS по РТ:</span> <span id="d-sms">0 шт</span></div>
-        </div>
-    </div>
-
-    <!-- Текстовые скрипты ответов (Клик на весь блок копирует текст) -->
-    <div class="glass-card">
-        <h2 style="font-size: 15px; margin: 0 0 5px 0;">📝 Готовые шаблоны для чата</h2>
-        <p style="font-size: 11px; opacity: 0.5; margin: 0 0 15px 0;">Нажмите на нужный контейнер для быстрого копирования текста</p>
-        
-        <div class="template-block" onclick="copyText('tpl-main-tj')" title="Нажмите, чтобы скопировать на таджикском">
-            <div id="tpl-main-tj"></div>
-        </div>
-
-        <div class="template-block" onclick="copyText('tpl-main-ru')" title="Нажмите, чтобы скопировать на русском">
-            <div id="tpl-main-ru"></div>
-        </div>
-    </div>
+<!-- Верхний баннер -->
+<div class="promo-banner">
+    <span class="promo-banner h0">Создавай тариф по своим интересам</span>
+    <p>Тариф «Включайся! Создавай Life 2.0» — Расчет ежедневной АП</p>
 </div>
 
-<div class="toast" id="toast">Текст успешно скопирован! ✨</div>
+<div class="app-grid">
+    
+    <!-- ЛЕВАЯ КОЛОНКА: Конструктор -->
+    <div class="white-card">
+        <h1>📊 Параметры тарифа</h1>
+        <div class="subtitle">Выберите пакеты для точного перерасчета по логике SBMS</div>
+        
+        <div class="section-title">Итоговая АП тарифа</div>
+        <div class="price-display">
+            <span class="amount" id="m-price-display">0.00</span>
+            <span class="currency">сомони / месяц</span>
+        </div>
+
+        <div class="section-title">Дақиқаҳо ба дигар шабакаҳо <span>ⓘ</span></div>
+        <div class="pill-group scrollable-pills" id="min-container"></div>
+
+        <div class="section-title">СМС пакетҳо <span>ⓘ</span></div>
+        <div class="pill-group" id="sms-container"></div>
+
+        <div class="section-title">Интернет пакетҳо <span>ⓘ</span></div>
+        <div class="pill-group scrollable-pills" id="gb-container"></div>
+    </div>
+
+    <!-- ПРАВАЯ КОЛОНКА: Итоги и шаблоны -->
+    <div class="sticky-side">
+        <!-- Блок суточных результатов -->
+        <div class="white-card">
+            <div class="result-box">
+                <h2>Суточный лимит (на 24 часа)</h2>
+                <div class="daily-stat"><span>Стоимость суток (+30%):</span> <span id="d-price" style="color: #00B956;">0.00 TJS</span></div>
+                <div class="daily-stat"><span>Минуты по РТ:</span> <span id="d-min">0 мин</span></div>
+                <div class="daily-stat"><span>SMS по РТ:</span> <span id="d-sms">0 шт</span></div>
+                <div class="daily-stat"><span>Интернет пакет:</span> <span id="d-gb" style="font-weight: 800;">0 мб</span></div>
+            </div>
+        </div>
+
+        <!-- Готовые скрипты чата -->
+        <div class="white-card">
+            <h2 style="font-size: 15px; margin: 0 0 4px 0; font-weight: 800;">📝 Шаблоны для копирования</h2>
+            <p style="font-size: 11px; color: #8E8E93; margin: 0 0 15px 0;">Нажмите на нужный блок ниже, чтобы мгновенно скопировать готовый ответ</p>
+            
+            <div class="template-block" onclick="copyText('tpl-main-tj')" title="Скопировать на таджикском">
+                <div id="tpl-main-tj"></div>
+            </div>
+
+            <div class="template-block" onclick="copyText('tpl-main-ru')" title="Скопировать на русском">
+                <div id="tpl-main-ru"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Тост -->
+<div class="toast" id="toast">Скопировано в буфер обмена! ✓</div>
 
 <script>
     const tariff = {
@@ -346,9 +407,9 @@
         navigator.clipboard.writeText(text).then(showToast);
     }
 
-    renderPills('gb-container', tariff.internet, 'gbIndex', 'ГБ');
     renderPills('min-container', tariff.minutes, 'minIndex', 'мин');
     renderPills('sms-container', tariff.sms, 'smsIndex', 'SMS');
+    renderPills('gb-container', tariff.internet, 'gbIndex', 'ГБ');
     calculateDaily();
 </script>
 </body>
